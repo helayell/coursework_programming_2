@@ -3,6 +3,10 @@ package uk.ac.soton.comp1206.game;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import uk.ac.soton.comp1206.component.GameBlock;
+import uk.ac.soton.comp1206.component.GameBlockCoordinate;
+
+import java.util.HashSet;
+import java.util.Random;
 
 /**
  * The Game class handles the main logic, state and properties of the TetrECS game. Methods to manipulate the game state
@@ -38,6 +42,7 @@ public class Game {
 
         //Create a new grid model to represent the game state
         this.grid = new Grid(cols,rows);
+        spawnPiece();
     }
 
     /**
@@ -64,16 +69,86 @@ public class Game {
         int x = gameBlock.getX();
         int y = gameBlock.getY();
 
+        logger.info("Block clicked at: {} {}. Attempting to place piece.", x , y);
+
+        if(grid.canPlayPiece(currentPiece, x , y)) {
+            grid.playPiece(currentPiece, x , y); //PLace piece on grid
+            afterPiece(); // Handles line clearance
+            nextPiece(); // Spawns next piece
+        }else{
+            logger.info("Cannot place piece");
+        }
         //Get the new value for this block
-        int previousValue = grid.get(x,y);
+       /* int previousValue = grid.get(x,y);
         int newValue = previousValue + 1;
         if (newValue  > GamePiece.PIECES) {
             newValue = 0;
         }
 
         //Update the grid with the new value
-        grid.set(x,y,newValue);
+        grid.set(x,y,newValue); */
     }
+    private GamePiece currentPiece; // Tracks current piece
+    private final Random random = new Random();
+
+    private void spawnPiece() {
+        // Spawn a piece using a random index between 0 and the total number of pieces - 1
+        currentPiece = GamePiece.createPiece(random.nextInt(GamePiece.PIECES));
+        logger.info("Spawning new piece: {}", currentPiece);
+    }
+    private void nextPiece() {
+        spawnPiece(); // should replace the current piece with a new one
+        logger.info("New piece spawned!");
+    }
+    public void afterPiece() {
+        logger.info("Checking for full lines after placing piece.");
+
+        HashSet<GameBlockCoordinate> clearedBlocks = new HashSet<>();
+        boolean lineCleared = false;
+
+        // Clear full horizontal lines
+        for (int y = 0; y < grid.getRows(); y++) {
+            boolean isFullLine = true;
+            for (int x = 0; x < grid.getCols(); x++) {
+                if (grid.get(x, y) == 0) {
+                    isFullLine = false;
+                    break;
+                }
+            }
+
+            if (isFullLine) {
+                for (int x = 0; x < grid.getCols(); x++) {
+                    grid.set(x, y, 0); // Clear the line
+                    clearedBlocks.add(new GameBlockCoordinate(x, y));
+                }
+                lineCleared = true;
+            }
+        }
+
+        // Clear full vertical lines
+        for (int x = 0; x < grid.getCols(); x++) {
+            boolean isFullLine = true;
+            for (int y = 0; y < grid.getRows(); y++) {
+                if (grid.get(x, y) == 0) {
+                    isFullLine = false;
+                    break;
+                }
+            }
+            if (isFullLine) {
+                for (int y = 0; y < grid.getRows(); y++) {
+                    grid.set(x, y, 0); // Clear the line
+                    clearedBlocks.add(new GameBlockCoordinate(x, y));
+                }
+                lineCleared = true;
+            }
+        }
+        if (lineCleared) {
+            logger.info("Lines cleared, blocks affected: {}", clearedBlocks);
+        } else {
+            logger.info("No lines cleared.");
+        }
+    }
+
 
     /**
      * Get the grid model inside this game representing the game state of the board

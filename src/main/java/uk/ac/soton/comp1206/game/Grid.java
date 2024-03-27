@@ -6,12 +6,12 @@ import javafx.beans.property.SimpleIntegerProperty;
 /**
  * The Grid is a model which holds the state of a game board. It is made up of a set of Integer values arranged in a 2D
  * arrow, with rows and columns.
- *
+ * <p>
  * Each value inside the Grid is an IntegerProperty can be bound to enable modification and display of the contents of
  * the grid.
- *
+ * <p>
  * The Grid contains functions related to modifying the model, for example, placing a piece inside the grid.
- *
+ * <p>
  * The Grid should be linked to a GameBoard for it's display.
  */
 public class Grid {
@@ -33,6 +33,7 @@ public class Grid {
 
     /**
      * Create a new Grid with the specified number of columns and rows and initialise them
+     *
      * @param cols number of columns
      * @param rows number of rows
      */
@@ -44,8 +45,8 @@ public class Grid {
         grid = new SimpleIntegerProperty[cols][rows];
 
         //Add a SimpleIntegerProperty to every block in the grid
-        for(var y = 0; y < rows; y++) {
-            for(var x = 0; x < cols; x++) {
+        for (var y = 0; y < rows; y++) {
+            for (var x = 0; x < cols; x++) {
                 grid[x][y] = new SimpleIntegerProperty(0);
             }
         }
@@ -53,6 +54,7 @@ public class Grid {
 
     /**
      * Get the Integer property contained inside the grid at a given row and column index. Can be used for binding.
+     *
      * @param x column
      * @param y row
      * @return the IntegerProperty at the given x and y in this grid
@@ -63,8 +65,9 @@ public class Grid {
 
     /**
      * Update the value at the given x and y index within the grid
-     * @param x column
-     * @param y row
+     *
+     * @param x     column
+     * @param y     row
      * @param value the new value
      */
     public void set(int x, int y, int value) {
@@ -73,6 +76,7 @@ public class Grid {
 
     /**
      * Get the value represented at the given x and y index within the grid
+     *
      * @param x column
      * @param y row
      * @return the value
@@ -89,6 +93,7 @@ public class Grid {
 
     /**
      * Get the number of columns in this game
+     *
      * @return number of columns
      */
     public int getCols() {
@@ -97,12 +102,45 @@ public class Grid {
 
     /**
      * Get the number of rows in this game
+     *
      * @return number of rows
      */
     public int getRows() {
         return rows;
     }
 
+    public boolean canPlayPiece(GamePiece piece, int x, int y) {
+        int[][] blocks = piece.getBlocks();
+        for (int i = 0; i < blocks.length; i++)
+            for (int j = 0; j < blocks[i].length; i++) {
+                if (blocks[i][j] == 0) {
+                    continue; // Skip empty blocks in the piece
+                }
+                int gridX = x + i - 1;
+                int gridY = y + j - 1;
+                if (gridX < 0 || gridX >= cols || gridY < 0 || gridY >= rows || get(gridX, gridY) != 0) {
+                    return false; // Piece cannot be played here
+
+                }
+            }
+
+        return true;
+    }
+    public void playPiece(GamePiece piece, int x, int y) {
+        if (!canPlayPiece(piece, x, y)) {
+            return; // Cannot play the piece here, might throw an exception or log an error as needed
+        }
+        int[][] blocks = piece.getBlocks();
+        for (int i = 0; i < blocks.length; i++) {
+            for (int j = 0; j < blocks[i].length; j++) {
+                if (blocks[i][j] == 0) {
+                    continue; // Skip empty blocks
+                }
+                int gridX = x + i - 1; // Adjust for the center of the piece
+                int gridY = y + j - 1; // Adjust for the center of the piece
+                set(gridX, gridY, piece.getValue()); // Place the piece block on the grid
+            }
+        }
+    }
+
 }
-
-
