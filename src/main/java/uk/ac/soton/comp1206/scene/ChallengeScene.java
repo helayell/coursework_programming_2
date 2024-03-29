@@ -1,13 +1,16 @@
 package uk.ac.soton.comp1206.scene;
-
 import javafx.scene.layout.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import uk.ac.soton.comp1206.Launcher;
 import uk.ac.soton.comp1206.component.GameBlock;
 import uk.ac.soton.comp1206.component.GameBoard;
 import uk.ac.soton.comp1206.game.Game;
 import uk.ac.soton.comp1206.ui.GamePane;
 import uk.ac.soton.comp1206.ui.GameWindow;
+import javafx.scene.control.Label;
+import javafx.scene.layout.VBox;
+
 
 /**
  * The Single Player challenge scene. Holds the UI for the single player challenge mode in the game.
@@ -51,6 +54,24 @@ public class ChallengeScene extends BaseScene {
 
         //Handle block on gameboard grid being clicked
         board.setOnBlockClick(this::blockClicked);
+        // Adds the UI elements
+        setupUIElements(mainPane);
+    }
+    private void setupUIElements(BorderPane mainPane) {
+        VBox statsBox = new VBox(10); //Vbox to hold our stats, spacing
+
+        Label scoreLabel = new Label();
+        Label levelLabel = new Label();
+        Label livesLabel = new Label();
+        Label multiplierLabel = new Label();
+
+        scoreLabel.textProperty().bind(game.scoreProperty().asString("Score: %d"));
+        levelLabel.textProperty().bind(game.levelProperty().asString("Level: %d"));
+        livesLabel.textProperty().bind(game.levelProperty().asString("Lives: %d"));
+        multiplierLabel.textProperty().bind(game.multiplierProperty().asString("Multiplier: %.1f"));
+
+        statsBox.getChildren().addAll(scoreLabel, levelLabel, livesLabel, multiplierLabel);
+        mainPane.setTop(statsBox);
     }
 
     /**
