@@ -61,6 +61,10 @@ public class MenuScene extends BaseScene {
      */
     @Override
     public void initialise() {
+        Multimedia.stopBackgroundMusic(); // Stop current music
+        // Then play the appropriate music for the current scene
+        logger.info("Initialising Menu");
+        Multimedia.playBackgroundMusic("/Users/helayel/Desktop/UniStuffUoS/coursework/src/main/resources/music/menu.mp3");
 
     }
 
