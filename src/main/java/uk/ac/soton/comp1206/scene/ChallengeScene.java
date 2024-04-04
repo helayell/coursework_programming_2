@@ -99,7 +99,7 @@ public class ChallengeScene extends BaseScene {
     public void initialise() {
         logger.info("Initialising Challenge");
         game.start();
-        Multimedia.playBackgroundMusic("/Users/helayel/Desktop/UniStuffUoS/coursework/src/main/resources/music/game.wav"); // Play background music for the game scene
+        Multimedia.playBackgroundMusic("game.wav"); // Play background music for the game scene
     }
 
 }
