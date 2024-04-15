@@ -181,4 +181,9 @@ public class GameBlock extends Canvas {
         value.bind(input);
     }
 
+    public void setValue(int newValue) {
+        this.value.set(newValue);
+        paint(); // Repaint the block with the new value's color
+    }
+
 }

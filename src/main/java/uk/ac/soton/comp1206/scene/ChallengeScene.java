@@ -1,15 +1,17 @@
 package uk.ac.soton.comp1206.scene;
-import javafx.scene.layout.*;
+
+import javafx.scene.control.Label;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import uk.ac.soton.comp1206.Launcher;
 import uk.ac.soton.comp1206.component.GameBlock;
 import uk.ac.soton.comp1206.component.GameBoard;
+import uk.ac.soton.comp1206.component.PieceBoard;
 import uk.ac.soton.comp1206.game.Game;
 import uk.ac.soton.comp1206.ui.GamePane;
 import uk.ac.soton.comp1206.ui.GameWindow;
-import javafx.scene.control.Label;
-import javafx.scene.layout.VBox;
 
 
 /**
@@ -28,6 +30,7 @@ public class ChallengeScene extends BaseScene {
         super(gameWindow);
         logger.info("Creating Challenge Scene");
     }
+    PieceBoard pieceBoard = new PieceBoard(3, 3, 150, 150); // Dimensions for a 3x3 grid, adjust size as needed
 
     /**
      * Build the Challenge window
@@ -56,7 +59,10 @@ public class ChallengeScene extends BaseScene {
         board.setOnBlockClick(this::blockClicked);
         // Adds the UI elements
         setupUIElements(mainPane);
+
+        mainPane.setRight(pieceBoard);
     }
+
     private void setupUIElements(BorderPane mainPane) {
         VBox statsBox = new VBox(10); //Vbox to hold our stats, spacing
 

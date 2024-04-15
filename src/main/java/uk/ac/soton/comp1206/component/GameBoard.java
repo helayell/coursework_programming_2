@@ -172,4 +172,11 @@ public class GameBoard extends GridPane {
         }
     }
 
+    public int getCols() {
+        return cols;
+    }
+
+    public int getRows() {
+        return rows;
+    }
 }
