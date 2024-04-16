@@ -1,9 +1,12 @@
 package uk.ac.soton.comp1206.scene;
 
 import javafx.event.ActionEvent;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
-import javafx.scene.layout.*;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
+import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import uk.ac.soton.comp1206.ui.GamePane;
@@ -33,27 +36,49 @@ public class MenuScene extends BaseScene {
         logger.info("Building " + this.getClass().getName());
 
         root = new GamePane(gameWindow.getWidth(),gameWindow.getHeight());
+        root.getStyleClass().add("gamepane"); // Ensure the game pane has black background
 
-        var menuPane = new StackPane();
-        menuPane.setMaxWidth(gameWindow.getWidth());
+        StackPane menuPane = new StackPane();
         menuPane.setMaxHeight(gameWindow.getHeight());
         menuPane.getStyleClass().add("menu-background");
         root.getChildren().add(menuPane);
 
-        var mainPane = new BorderPane();
-        menuPane.getChildren().add(mainPane);
+        VBox menuBox = new VBox(20);
+        menuBox.setAlignment(Pos.CENTER);
+        menuPane.getChildren().add(menuBox);
 
         //Awful title
-        var title = new Text("TetrECS");
-        title.getStyleClass().add("title");
-        mainPane.setTop(title);
+        Text title = new Text("TetrECS");
+        title.getStyleClass().add("bigtitle");
+        menuBox.getChildren().add(title);
 
         //For now, let us just add a button that starts the game. I'm sure you'll do something way better.
-        var button = new Button("Play");
-        mainPane.setCenter(button);
-
+        Button playButton = new Button("Play!");
+        playButton.getStyleClass().add("menuButton");
         //Bind the button action to the startGame method in the menu
-        button.setOnAction(this::startGame);
+        playButton.setOnAction(this::startGame);
+        menuBox.getChildren().add(playButton);
+
+        Button settingsButton = new Button("Settings");
+        settingsButton.getStyleClass().add("menuButton");
+        settingsButton.setOnAction(this::showSettings);
+        menuBox.getChildren().add(settingsButton);
+
+        Button exitButton = new Button("Exit");
+        exitButton.getStyleClass().add("menuButton");
+        exitButton.setOnAction(e -> System.exit(0));
+        menuBox.getChildren().add(exitButton);
+
+        applyFadeInTransition(menuPane);
+    }
+
+    /**
+     * Shows the settings for the game
+     */
+    private void showSettings(ActionEvent actionEvent) {
+
+        logger.info("Settings button clicked");
+
     }
 
     /**
@@ -64,8 +89,15 @@ public class MenuScene extends BaseScene {
         Multimedia.stopBackgroundMusic(); // Stop current music
         // Then play the appropriate music for the current scene
         logger.info("Initialising Menu");
-        Multimedia.playBackgroundMusic("menu.mp3");
+        Multimedia.playBackgroundMusic("resources/music/menu.mp3");
 
+    }
+
+    private void applyFadeInTransition(StackPane pane) {
+        FadeTransition fadeTransition = new FadeTransition(Duration.seconds(1), pane);
+        fadeTransition.setFromValue(0);
+        fadeTransition.setToValue(1);
+        fadeTransition.play();
     }
 
     /**
