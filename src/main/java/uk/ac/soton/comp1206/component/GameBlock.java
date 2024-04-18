@@ -65,11 +65,12 @@ public class GameBlock extends Canvas {
 
     /**
      * Create a new single Game Block
+     *
      * @param gameBoard the board this block belongs to
-     * @param x the column the block exists in
-     * @param y the row the block exists in
-     * @param width the width of the canvas to render
-     * @param height the height of the canvas to render
+     * @param x         the column the block exists in
+     * @param y         the row the block exists in
+     * @param width     the width of the canvas to render
+     * @param height    the height of the canvas to render
      */
     public GameBlock(GameBoard gameBoard, int x, int y, double width, double height) {
         this.gameBoard = gameBoard;
@@ -91,9 +92,10 @@ public class GameBlock extends Canvas {
 
     /**
      * When the value of this block is updated,
+     *
      * @param observable what was updated
-     * @param oldValue the old value
-     * @param newValue the new value
+     * @param oldValue   the old value
+     * @param newValue   the new value
      */
     private void updateValue(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
         paint();
@@ -104,7 +106,7 @@ public class GameBlock extends Canvas {
      */
     public void paint() {
         //If the block is empty, paint as empty
-        if(value.get() == 0) {
+        if (value.get() == 0) {
             paintEmpty();
         } else {
             //If the block is not empty, paint with the colour represented by the value
@@ -119,38 +121,40 @@ public class GameBlock extends Canvas {
         var gc = getGraphicsContext2D();
 
         //Clear
-        gc.clearRect(0,0,width,height);
+        gc.clearRect(0, 0, width, height);
 
         //Fill
         gc.setFill(Color.WHITE);
-        gc.fillRect(0,0, width, height);
+        gc.fillRect(0, 0, width, height);
 
         //Border
         gc.setStroke(Color.BLACK);
-        gc.strokeRect(0,0,width,height);
+        gc.strokeRect(0, 0, width, height);
     }
 
     /**
      * Paint this canvas with the given colour
+     *
      * @param colour the colour to paint
      */
     private void paintColor(Paint colour) {
         var gc = getGraphicsContext2D();
 
         //Clear
-        gc.clearRect(0,0,width,height);
+        gc.clearRect(0, 0, width, height);
 
         //Colour fill
         gc.setFill(colour);
-        gc.fillRect(0,0, width, height);
+        gc.fillRect(0, 0, width, height);
 
         //Border
         gc.setStroke(Color.BLACK);
-        gc.strokeRect(0,0,width,height);
+        gc.strokeRect(0, 0, width, height);
     }
 
     /**
      * Get the column of this block
+     *
      * @return column number
      */
     public int getX() {
@@ -159,6 +163,7 @@ public class GameBlock extends Canvas {
 
     /**
      * Get the row of this block
+     *
      * @return row number
      */
     public int getY() {
@@ -167,6 +172,7 @@ public class GameBlock extends Canvas {
 
     /**
      * Get the current value held by this block, representing it's colour
+     *
      * @return value
      */
     public int getValue() {
@@ -175,6 +181,7 @@ public class GameBlock extends Canvas {
 
     /**
      * Bind the value of this block to another property. Used to link the visual block to a corresponding block in the Grid.
+     *
      * @param input property to bind the value to
      */
     public void bind(ObservableValue<? extends Number> input) {
@@ -182,8 +189,12 @@ public class GameBlock extends Canvas {
     }
 
     public void setValue(int newValue) {
-        this.value.set(newValue);
-        paint(); // Repaint the block with the new value's color
-    }
+        if (!value.isBound()) {
+            this.value.set(newValue);
+            paint(); // Repaint the block with the new value's color
+        } else {
+            logger.warn("Attempted to set a bound value for GameBlock at position (" + x + ", " + y + ")");
+        }
 
+    }
 }

@@ -109,23 +109,37 @@ public class Grid {
         return rows;
     }
 
+    /**
+     * Checks if a piece can be placed on the grid at the specified coordinates.
+     * @param piece the game piece to be placed
+     * @param x the column index of the piece's center
+     * @param y the row index of the piece's center
+     * @return true if the piece can be placed; false otherwise
+     */
+
     public boolean canPlayPiece(GamePiece piece, int x, int y) {
-        int[][] blocks = piece.getBlocks();
-        for (int i = 0; i < blocks.length; i++)
-            for (int j = 0; j < blocks[i].length; i++) {
+        int[][] blocks = piece.getBlocks(); // 2D array representing the shape of the piece
+        for (int i = 0; i < blocks.length; i++) {
+            for (int j = 0; j < blocks[i].length; j++) { // Corrected the increment from i++ to j++
                 if (blocks[i][j] == 0) {
                     continue; // Skip empty blocks in the piece
                 }
-                int gridX = x + i - 1;
-                int gridY = y + j - 1;
+                int gridX = x + i - 1; // Calculate the actual x coordinate on the grid
+                int gridY = y + j - 1; // Calculate the actual y coordinate on the grid
                 if (gridX < 0 || gridX >= cols || gridY < 0 || gridY >= rows || get(gridX, gridY) != 0) {
-                    return false; // Piece cannot be played here
-
+                    return false; // Block cannot be placed if out of bounds or if cell is not empty
                 }
             }
-
-        return true;
+        }
+        return true; // All checks passed, piece can be placed
     }
+
+    /**
+     * Places a piece on the grid if possible at the specified coordinates.
+     * @param piece the game piece to be placed
+     * @param x the column index of the piece's center
+     * @param y the row index of the piece's center
+     */
     public void playPiece(GamePiece piece, int x, int y) {
         if (!canPlayPiece(piece, x, y)) {
             return; // Cannot play the piece here, might throw an exception or log an error as needed

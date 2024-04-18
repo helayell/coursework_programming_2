@@ -4,6 +4,7 @@ import javafx.animation.FadeTransition;
 import javafx.event.ActionEvent;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
@@ -65,15 +66,17 @@ public class MenuScene extends BaseScene {
         settingsButton.setOnAction(this::showSettings);
         menuBox.getChildren().add(settingsButton);
 
+        Button instructionsButton = new Button("Instructions");
+        instructionsButton.getStyleClass().add("menuButton");
+        instructionsButton.setOnAction(this::showInstructions);
+        menuBox.getChildren().add(instructionsButton);
+
         Button exitButton = new Button("Exit");
         exitButton.getStyleClass().add("menuButton");
         exitButton.setOnAction(e -> System.exit(0));
         menuBox.getChildren().add(exitButton);
 
-        Button instructionsButton = new Button("Instructions");
-        instructionsButton.getStyleClass().add("menuButton");
-        instructionsButton.setOnAction(this::showInstructions);
-        menuBox.getChildren().add(instructionsButton);
+
 
 
         applyFadeInTransition(menuPane);
@@ -88,7 +91,11 @@ public class MenuScene extends BaseScene {
 
     }
 
-    // Method to handle Instructions button action
+    /**
+     * Handles the action of pressing the Instructions button.
+     * Transitions to the InstructionsScene.
+     * @param event the event triggered when the button is pressed
+     */
     private void showInstructions(ActionEvent event) {
         gameWindow.loadScene(new InstructionsScene(gameWindow));
     }
@@ -101,7 +108,14 @@ public class MenuScene extends BaseScene {
         Multimedia.stopBackgroundMusic(); // Stop current music
         // Then play the appropriate music for the current scene
         logger.info("Initialising Menu");
-        Multimedia.playBackgroundMusic("resources/music/menu.mp3");
+        Multimedia.playBackgroundMusic("/music/menu.mp3");
+
+        // Listen for keyboard events
+        scene.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ESCAPE) {
+                System.exit(0); // Leaves the game (but why would you :/ )
+            }
+        });
 
     }
 

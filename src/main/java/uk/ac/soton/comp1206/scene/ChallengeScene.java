@@ -1,6 +1,7 @@
 package uk.ac.soton.comp1206.scene;
 
 import javafx.scene.control.Label;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -24,12 +25,14 @@ public class ChallengeScene extends BaseScene {
 
     /**
      * Create a new Single Player challenge scene
+     *
      * @param gameWindow the Game Window
      */
     public ChallengeScene(GameWindow gameWindow) {
         super(gameWindow);
         logger.info("Creating Challenge Scene");
     }
+
     PieceBoard pieceBoard = new PieceBoard(3, 3, 150, 150); // Dimensions for a 3x3 grid, adjust size as needed
 
     /**
@@ -41,7 +44,7 @@ public class ChallengeScene extends BaseScene {
 
         setupGame();
 
-        root = new GamePane(gameWindow.getWidth(),gameWindow.getHeight());
+        root = new GamePane(gameWindow.getWidth(), gameWindow.getHeight());
 
         var challengePane = new StackPane();
         challengePane.setMaxWidth(gameWindow.getWidth());
@@ -52,7 +55,7 @@ public class ChallengeScene extends BaseScene {
         var mainPane = new BorderPane();
         challengePane.getChildren().add(mainPane);
 
-        var board = new GameBoard(game.getGrid(),gameWindow.getWidth()/2,gameWindow.getWidth()/2);
+        var board = new GameBoard(game.getGrid(), gameWindow.getWidth() / 2, gameWindow.getWidth() / 2);
         mainPane.setCenter(board);
 
         //Handle block on gameboard grid being clicked
@@ -82,6 +85,7 @@ public class ChallengeScene extends BaseScene {
 
     /**
      * Handle when a block is clicked
+     *
      * @param gameBlock the Game Block that was clocked
      */
     private void blockClicked(GameBlock gameBlock) {
@@ -98,6 +102,7 @@ public class ChallengeScene extends BaseScene {
         game = new Game(5, 5);
     }
 
+
     /**
      * Initialise the scene and start the game
      */
@@ -105,8 +110,22 @@ public class ChallengeScene extends BaseScene {
     public void initialise() {
         logger.info("Initialising Challenge");
         game.start();
-        Multimedia.playBackgroundMusic("resources/music/game.wav"); // Play background music for the game scene
+        Multimedia.playBackgroundMusic("/music/game.wav"); // Play background music for the game scene
+
+        scene.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ESCAPE) {
+                shutdownChallenge();
+            }
+        });
     }
 
+    /**
+     * Method to properly shutdown the challenge and cleanup resources.
+     */
+    public void shutdownChallenge() {
+        // Stop timers, release resources, save state, etc.
+        logger.info("Shutting down the challenge");
+        gameWindow.startMenu();
+    }
 }
 
