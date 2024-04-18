@@ -1,5 +1,6 @@
 package uk.ac.soton.comp1206.scene;
 
+import javafx.animation.FadeTransition;
 import javafx.event.ActionEvent;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -69,6 +70,12 @@ public class MenuScene extends BaseScene {
         exitButton.setOnAction(e -> System.exit(0));
         menuBox.getChildren().add(exitButton);
 
+        Button instructionsButton = new Button("Instructions");
+        instructionsButton.getStyleClass().add("menuButton");
+        instructionsButton.setOnAction(this::showInstructions);
+        menuBox.getChildren().add(instructionsButton);
+
+
         applyFadeInTransition(menuPane);
     }
 
@@ -79,6 +86,11 @@ public class MenuScene extends BaseScene {
 
         logger.info("Settings button clicked");
 
+    }
+
+    // Method to handle Instructions button action
+    private void showInstructions(ActionEvent event) {
+        gameWindow.loadScene(new InstructionsScene(gameWindow));
     }
 
     /**
@@ -94,7 +106,7 @@ public class MenuScene extends BaseScene {
     }
 
     private void applyFadeInTransition(StackPane pane) {
-        FadeTransition fadeTransition = new FadeTransition(Duration.seconds(1), pane);
+        FadeTransition fadeTransition = new FadeTransition(Duration.seconds(0.5), pane);
         fadeTransition.setFromValue(0);
         fadeTransition.setToValue(1);
         fadeTransition.play();

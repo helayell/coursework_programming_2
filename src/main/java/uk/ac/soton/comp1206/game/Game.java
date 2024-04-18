@@ -1,5 +1,9 @@
 package uk.ac.soton.comp1206.game;
 
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import uk.ac.soton.comp1206.component.GameBlock;
@@ -7,11 +11,6 @@ import uk.ac.soton.comp1206.component.GameBlockCoordinate;
 
 import java.util.HashSet;
 import java.util.Random;
-
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
 
 /**
  * The Game class handles the main logic, state and properties of the TetrECS game. Methods to manipulate the game state
@@ -93,14 +92,14 @@ public class Game {
             logger.info("Cannot place piece");
         }
         //Get the new value for this block
-       /* int previousValue = grid.get(x,y);
+        int previousValue = grid.get(x,y);
         int newValue = previousValue + 1;
         if (newValue  > GamePiece.PIECES) {
             newValue = 0;
         }
 
         //Update the grid with the new value
-        grid.set(x,y,newValue); */
+        grid.set(x,y,newValue);
     }
 
     private GamePiece currentPiece; // Tracks current piece
