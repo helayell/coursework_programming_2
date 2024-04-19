@@ -8,6 +8,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import uk.ac.soton.comp1206.component.GameBlock;
 import uk.ac.soton.comp1206.component.GameBlockCoordinate;
+import uk.ac.soton.comp1206.event.NextPieceListener;
 
 import java.util.HashSet;
 import java.util.Random;
@@ -17,6 +18,8 @@ import java.util.Random;
  * and to handle actions made by the player should take place inside this class.
  */
 public class Game {
+
+    private NextPieceListener nextPieceListener;
 
     private static final Logger logger = LogManager.getLogger(Game.class);
 
@@ -56,6 +59,24 @@ public class Game {
     private final IntegerProperty lives = new SimpleIntegerProperty(3);
     private final DoubleProperty multiplier = new SimpleDoubleProperty(1.0);
 
+
+    public void setNextPieceListener(NextPieceListener listener) {
+        this.nextPieceListener = listener;
+    }
+
+    /**
+     *  Method to generate or retrieve the next piece
+     */
+
+    public void generateNextPiece() {
+        // Example of generating a random piece
+        GamePiece nextPiece = GamePiece.createPiece((int) (Math.random() * GamePiece.PIECES));
+
+        // Notify the listener with the new piece
+        if (nextPieceListener != null) {
+            nextPieceListener.nextPiece(nextPiece);
+        }
+    }
 
     /**
      * Start the game

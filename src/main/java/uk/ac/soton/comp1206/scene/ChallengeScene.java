@@ -10,7 +10,9 @@ import org.apache.logging.log4j.Logger;
 import uk.ac.soton.comp1206.component.GameBlock;
 import uk.ac.soton.comp1206.component.GameBoard;
 import uk.ac.soton.comp1206.component.PieceBoard;
+import uk.ac.soton.comp1206.event.NextPieceListener;
 import uk.ac.soton.comp1206.game.Game;
+import uk.ac.soton.comp1206.game.GamePiece;
 import uk.ac.soton.comp1206.ui.GamePane;
 import uk.ac.soton.comp1206.ui.GameWindow;
 
@@ -18,10 +20,11 @@ import uk.ac.soton.comp1206.ui.GameWindow;
 /**
  * The Single Player challenge scene. Holds the UI for the single player challenge mode in the game.
  */
-public class ChallengeScene extends BaseScene {
+public class ChallengeScene extends BaseScene implements NextPieceListener {
 
     private static final Logger logger = LogManager.getLogger(MenuScene.class);
     protected Game game;
+    private PieceBoard pieceBoard;
 
     /**
      * Create a new Single Player challenge scene
@@ -31,9 +34,12 @@ public class ChallengeScene extends BaseScene {
     public ChallengeScene(GameWindow gameWindow) {
         super(gameWindow);
         logger.info("Creating Challenge Scene");
+        this.pieceBoard = new PieceBoard(3, 3, 150, 150);
+        setupGame();
+
     }
 
-    PieceBoard pieceBoard = new PieceBoard(3, 3, 150, 150); // Dimensions for a 3x3 grid, adjust size as needed
+     // Dimensions for a 3x3 grid, adjust size as needed
 
     /**
      * Build the Challenge window
@@ -100,6 +106,8 @@ public class ChallengeScene extends BaseScene {
 
         //Start new game
         game = new Game(5, 5);
+        game.setNextPieceListener(this);
+        game.generateNextPiece();  // Triggers the first piece generation
     }
 
 
@@ -126,6 +134,13 @@ public class ChallengeScene extends BaseScene {
         // Stop timers, release resources, save state, etc.
         logger.info("Shutting down the challenge");
         gameWindow.startMenu();
+    }
+
+    @Override
+    public void nextPiece(GamePiece piece) {
+
+        pieceBoard.displayPiece(piece.getBlocks());
+
     }
 }
 
