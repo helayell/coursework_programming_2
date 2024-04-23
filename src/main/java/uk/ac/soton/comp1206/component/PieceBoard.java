@@ -29,24 +29,32 @@ public class PieceBoard extends GameBoard {
      *
      * @param piece The 2D array representing the piece to display, where each element's value corresponds to a color index.
      */
+
     public void displayPiece(int[][] piece) {
-        clearGrid();
-        int startX = (getCols() - piece[0].length) / 2;
+        clearGrid(); // Clear previous pieces
+
+        int centerX = (getCols() - piece[0].length) / 2;
         int startY = (getRows() - piece.length) / 2;
 
         for (int y = 0; y < piece.length; y++) {
             for (int x = 0; x < piece[y].length; x++) {
+                int gridX = centerX + x;
+                int gridY = startY + y;
                 if (piece[y][x] != 0) {
-                    GameBlock block = getBlock(startX + x, startY + y);
+                    GameBlock block = getBlock(gridX, gridY);
                     if (block != null) {
-                        logger.debug("Updating block at (" + (startX + x) + ", " + (startY + y) + ") to color index " + piece[y][x]);
-                        block.setValue(piece[y][x]); // Set block value to color index or state as per piece array
-                        block.paint();// Assuming repaint method exists to refresh the UI, replace 'paint' with 'repaint' if needed
-                    } else {
-                        logger.debug("No block found at (" + (startX + x) + ", " + (startY + y) + ")");
+                        block.setValue(piece[y][x]);
+                        block.paint();
                     }
                 }
             }
+        }
+
+        // Add indicator on the central block
+        GameBlock centerBlock = getBlock(getCols() / 2, getRows() / 2);
+        if (centerBlock != null) {
+            centerBlock.setCenterIndicator(true); // Set a flag to draw a special indicator
+            centerBlock.paint();
         }
     }
 

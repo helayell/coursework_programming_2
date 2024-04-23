@@ -4,6 +4,7 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.paint.*;
 import org.apache.logging.log4j.LogManager;
@@ -21,6 +22,7 @@ import org.apache.logging.log4j.Logger;
 public class GameBlock extends Canvas {
 
     private static final Logger logger = LogManager.getLogger(GameBlock.class);
+    private boolean centerIndicator = false;
 
     /**
      * The set of colours for different pieces
@@ -83,6 +85,7 @@ public class GameBlock extends Canvas {
         //A canvas needs a fixed width and height
         setWidth(width);
         setHeight(height);
+        setupHoverEffects(); // Call this method to setup hover effects
 
         //Do an initial paint
         paint();
@@ -102,17 +105,60 @@ public class GameBlock extends Canvas {
         paint();
     }
 
+    public void setCenterIndicator(boolean centerIndicator) {
+        this.centerIndicator = centerIndicator;
+    }
+
+    private void setupHoverEffects() {
+        this.setOnMouseEntered(event -> highlight(true));
+        this.setOnMouseExited(event -> highlight(false));
+    }
+
+    private void highlight(boolean hover) {
+        if (hover) {
+            getGraphicsContext2D().setStroke(Color.PURPLE); // Set hover color
+            getGraphicsContext2D().setLineWidth(4); // Set hover border thickness
+        } else {
+            getGraphicsContext2D().setStroke(Color.BLACK);
+            getGraphicsContext2D().setLineWidth(1); // Reset border thickness
+        }
+        paint(); // Repaint to update visual state
+    }
+
+
+
+
     /**
      * Handle painting of the block canvas
      */
     public void paint() {
-        logger.debug("Painting block at position (" + x + "," + y + ") with value " + value.get());
+        var gc = getGraphicsContext2D();
+        clearBlock(gc); // Clear previous content
+
         if (value.get() == 0) {
             paintEmpty();
         } else {
             paintColor(COLOURS[value.get()]);
         }
+
+
+        if (centerIndicator) {
+            var gradient = new LinearGradient(0, 0, 1, 1, true, CycleMethod.NO_CYCLE,
+                    new Stop(0.5, Color.GOLD),
+                    new Stop(0, Color.PURPLE));
+            gc.setFill(gradient);
+            gc.setStroke(Color.BLACK);
+            gc.setLineWidth(0.65);
+
+            double radius = Math.min(width, height) * 0.65; // Adjust size as necessary
+            gc.fillOval((width - radius) / 2, (height - radius) / 2, radius, radius);
+        }
     }
+
+    private void clearBlock(GraphicsContext gc) {
+        gc.clearRect(0, 0, width, height);
+    }
+
 
 
     /**
@@ -126,8 +172,9 @@ public class GameBlock extends Canvas {
 
         // Gradient fill for empty blocks to make them visually appealing
         var gradient = new LinearGradient(0, 0, 1, 1, true, CycleMethod.NO_CYCLE,
-                new Stop(0, Color.WHITE),
-                new Stop(1, Color.LIGHTGRAY));
+                new Stop(1, Color.TRANSPARENT),
+                new Stop(0, Color.WHITE));
+                new Stop(0.5, Color.PURPLE);
         gc.setFill(gradient);
         gc.fillRoundRect(0, 0, width, height, 10, 10);  // Rounded corners
 
