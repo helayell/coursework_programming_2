@@ -120,7 +120,7 @@ public class Grid {
     public boolean canPlayPiece(GamePiece piece, int x, int y) {
         int[][] blocks = piece.getBlocks(); // 2D array representing the shape of the piece
         for (int i = 0; i < blocks.length; i++) {
-            for (int j = 0; j < blocks[i].length; j++) { // Corrected the increment from i++ to j++
+            for (int j = 0; j < blocks[i].length; j++) {
                 if (blocks[i][j] == 0) {
                     continue; // Skip empty blocks in the piece
                 }

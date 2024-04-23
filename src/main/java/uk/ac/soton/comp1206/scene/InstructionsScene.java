@@ -60,18 +60,18 @@ public class InstructionsScene extends BaseScene {
             /* Initializes a new PieceBoard to display the game pieces
              The PieceBoard is set with dimensions of 3x3 and size 100x100 pixels
              */
-            PieceBoard pieceBoard = new PieceBoard(3, 5, 150, 150);
+            PieceBoard pieceBoard = new PieceBoard(3, 3, 100, 100);
             /* Displays the game piece blocks on the PieceBoard
             The blocks are retrieved from the GamePiece instance
              */
             pieceBoard.displayPiece(piece.getBlocks());
-            grid.add(pieceBoard, 1, 1); // Arrange in 5 columns
+            grid.add(pieceBoard, 15, 5); // Arrange in 5 columns
         }
 
 
         // Load and display the instructions image
         ImageView imageView = new ImageView(new Image(getClass().getResourceAsStream("/images/instructions.png")));
-        imageView.setFitWidth(gameWindow.getWidth() * 0.8); // Set width to 80% of window
+        imageView.setFitWidth(gameWindow.getWidth() * 0.5); // Set width to 80% of window
         imageView.setPreserveRatio(true);
         instructionsBox.getChildren().add(imageView);
 

@@ -4,6 +4,7 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.paint.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -43,7 +44,7 @@ public class GameBlock extends Canvas {
             Color.PURPLE
     };
 
-    private final GameBoard gameBoard;
+    public final GameBoard gameBoard;
 
     private final double width;
     private final double height;
@@ -105,14 +106,14 @@ public class GameBlock extends Canvas {
      * Handle painting of the block canvas
      */
     public void paint() {
-        //If the block is empty, paint as empty
+        logger.debug("Painting block at position (" + x + "," + y + ") with value " + value.get());
         if (value.get() == 0) {
             paintEmpty();
         } else {
-            //If the block is not empty, paint with the colour represented by the value
             paintColor(COLOURS[value.get()]);
         }
     }
+
 
     /**
      * Paint this canvas empty
@@ -120,17 +121,21 @@ public class GameBlock extends Canvas {
     private void paintEmpty() {
         var gc = getGraphicsContext2D();
 
-        //Clear
+        // Clear
         gc.clearRect(0, 0, width, height);
 
-        //Fill
-        gc.setFill(Color.WHITE);
-        gc.fillRect(0, 0, width, height);
+        // Gradient fill for empty blocks to make them visually appealing
+        var gradient = new LinearGradient(0, 0, 1, 1, true, CycleMethod.NO_CYCLE,
+                new Stop(0, Color.WHITE),
+                new Stop(1, Color.LIGHTGRAY));
+        gc.setFill(gradient);
+        gc.fillRoundRect(0, 0, width, height, 10, 10);  // Rounded corners
 
-        //Border
+        // Border
         gc.setStroke(Color.BLACK);
-        gc.strokeRect(0, 0, width, height);
+        gc.strokeRoundRect(0, 0, width, height, 10, 10);
     }
+
 
     /**
      * Paint this canvas with the given colour
@@ -140,17 +145,26 @@ public class GameBlock extends Canvas {
     private void paintColor(Paint colour) {
         var gc = getGraphicsContext2D();
 
-        //Clear
+        // Clear
         gc.clearRect(0, 0, width, height);
 
-        //Colour fill
-        gc.setFill(colour);
-        gc.fillRect(0, 0, width, height);
+        // Drop shadow for a slight 3D effect
+        DropShadow ds = new DropShadow();
+        ds.setOffsetY(3.0);
+        ds.setOffsetX(3.0);
+        ds.setColor(Color.color(0, 0, 0, 0.5));
+        gc.setEffect(ds);
 
-        //Border
+        // Colour fill with rounded corners
+        gc.setFill(colour);
+        gc.fillRoundRect(0, 0, width, height, 10, 10);  // Rounded corners
+
+        // Border
         gc.setStroke(Color.BLACK);
-        gc.strokeRect(0, 0, width, height);
+        gc.strokeRoundRect(0, 0, width, height, 10, 10);
+        gc.setEffect(null);  // Reset the effect so it does not affect other elements
     }
+
 
     /**
      * Get the column of this block
@@ -188,13 +202,21 @@ public class GameBlock extends Canvas {
         value.bind(input);
     }
 
+    /**
+     * Sets the value of the GameBlock to the specified new value.
+     *
+     * @param newValue the new value to be set for the GameBlock
+     */
     public void setValue(int newValue) {
+        // Check if the value is not bound to any other component
         if (!value.isBound()) {
+            // Update the value of the GameBlock
             this.value.set(newValue);
-            paint(); // Repaint the block with the new value's color
-        } else {
-            logger.warn("Attempted to set a bound value for GameBlock at position (" + x + ", " + y + ")");
+            // Triggers a repaint of the block with the new value's color
+            paint();
+        }// else {
+            // Logs a warning if the value is bound and cannot be changed
+            //logger.warn("Attempted to set a bound value for GameBlock at position (" + x + ", " + y + ")");
         }
-
-    }
 }
+

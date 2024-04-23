@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 import uk.ac.soton.comp1206.component.GameBlock;
 import uk.ac.soton.comp1206.component.GameBlockCoordinate;
 import uk.ac.soton.comp1206.event.NextPieceListener;
+import uk.ac.soton.comp1206.scene.Multimedia;
 
 import java.util.HashSet;
 import java.util.Random;
@@ -20,6 +21,7 @@ import java.util.Random;
 public class Game {
 
     private NextPieceListener nextPieceListener;
+    private static GamePiece followingPiece; // Tracks the following piece
 
     private static final Logger logger = LogManager.getLogger(Game.class);
 
@@ -38,6 +40,9 @@ public class Game {
      */
     protected final Grid grid;
 
+    private int currentAimX;
+    private int currentAimY;
+
     /**
      * Create a new game with the specified rows and columns. Creates a corresponding grid model.
      *
@@ -49,15 +54,18 @@ public class Game {
     public Game(int cols, int rows) {
         this.cols = cols;
         this.rows = rows;
+        this.currentAimX = cols / 2;
+        this.currentAimY = rows / 2;
 
         //Create a new grid model to represent the game state
         this.grid = new Grid(cols, rows);
-        spawnPiece();
+        spawnPiece(); // This will set the initial currentPiece
+        spawnFollowingPiece(); // This will set the initial followingPiece
     }
     private final IntegerProperty score = new SimpleIntegerProperty(0);
     private final IntegerProperty level = new SimpleIntegerProperty(0);
     private final IntegerProperty lives = new SimpleIntegerProperty(3);
-    private final DoubleProperty multiplier = new SimpleDoubleProperty(1.0);
+    private static final DoubleProperty multiplier = new SimpleDoubleProperty(1.0);
 
 
     public void setNextPieceListener(NextPieceListener listener) {
@@ -69,12 +77,12 @@ public class Game {
      */
 
     public void generateNextPiece() {
-        // Example of generating a random piece
-        GamePiece nextPiece = GamePiece.createPiece((int) (Math.random() * GamePiece.PIECES));
+        GamePiece nextPiece = followingPiece;
+        followingPiece = GamePiece.createPiece((int) (Math.random() * GamePiece.PIECES));
 
         // Notify the listener with the new piece
         if (nextPieceListener != null) {
-            nextPieceListener.nextPiece(nextPiece);
+            nextPieceListener.nextPiece(nextPiece, followingPiece);
         }
     }
 
@@ -113,28 +121,32 @@ public class Game {
             logger.info("Cannot place piece");
         }
         //Get the new value for this block
-        int previousValue = grid.get(x,y);
-        int newValue = previousValue + 1;
-        if (newValue  > GamePiece.PIECES) {
-            newValue = 0;
-        }
+
+        Multimedia.playAudio("/sounds/place.wav");
 
         //Update the grid with the new value
-        grid.set(x,y,newValue);
+
     }
 
-    private GamePiece currentPiece; // Tracks current piece
-    private final Random random = new Random();
+    private static GamePiece currentPiece; // Tracks current piece
+    private static final Random random = new Random();
 
-    private void spawnPiece() {
+    public static void spawnPiece() {
         // Spawn a piece using a random index between 0 and the total number of pieces - 1
         currentPiece = GamePiece.createPiece(random.nextInt(GamePiece.PIECES));
         logger.info("Spawning new piece: {}", currentPiece);
     }
 
-    private void nextPiece() {
-        spawnPiece(); // should replace the current piece with a new one
-        logger.info("New piece spawned. Multiplier : {}", multiplier.get());
+
+    private static void spawnFollowingPiece() {
+        followingPiece = GamePiece.createPiece(random.nextInt(GamePiece.PIECES));
+        logger.info("Following new piece: {}", followingPiece);
+    }
+
+    public static void nextPiece() {
+        currentPiece = followingPiece;
+        spawnFollowingPiece(); // Spawn a new following piece
+        logger.info("New current piece: {}, New following piece spawned: {}, Multiplier: {}", currentPiece, followingPiece, multiplier.get());
     }
 
     public void updateScore(int numberOfLines, int numberOfBlocksCleared) {
@@ -216,6 +228,72 @@ public class Game {
             logger.info("No lines cleared. Multiplier reset.");
         }
     }
+
+    /**
+     * Rotates the current piece 90 degrees clockwise.
+     */
+    public void rotateCurrentPiece() {
+        if (currentPiece != null) {
+            // Rotate the piece
+            currentPiece.rotate();
+
+            Multimedia.playAudio("/sounds/rotate.wav");
+
+            // Optionally notify any listeners or update the game state
+            logger.info("Current piece rotated: {}", currentPiece);
+        } else {
+            logger.warn("No current piece to rotate.");
+        }
+    }
+
+    public void swapCurrentPiece() {
+        if (currentPiece == null || followingPiece == null) {
+            logger.warn("Attempted to swap pieces when one or both pieces are null");
+            return;
+        }
+
+        GamePiece temp = currentPiece;
+        currentPiece = followingPiece;
+        followingPiece = temp;
+        Multimedia.playAudio("/sounds/pling.wav");
+
+        logger.info("Swapped current piece with following piece. Current: {}, Following: {}", currentPiece, followingPiece);
+
+        // Notify listeners about the swap, update both current and following pieces on the UI
+        if (nextPieceListener != null) {
+            nextPieceListener.nextPiece(currentPiece, followingPiece);
+        }
+    }
+
+    public void dropPieceAtAim() {
+        if (grid.canPlayPiece(currentPiece, currentAimX, currentAimY)) {
+            grid.playPiece(currentPiece, currentAimX, currentAimY);
+            afterPiece(); // Handles line clearance
+            nextPiece(); // Spawns next piece
+        } else {
+            logger.info("Cannot place piece(ENTER)");
+            Multimedia.playAudio("/sounds/place.wav");
+            // Handle post-drop actions such as generating the next piece
+        }
+
+        Multimedia.playAudio("/sounds/place.wav");
+
+    }
+
+
+    public void moveAim(int dx, int dy) {
+        int newX = currentAimX + dx;
+        int newY = currentAimY + dy;
+
+        // Check boundaries before updating the current aim position
+        if (newX >= 0 && newX < cols) {
+            currentAimX = newX;
+        }
+        if (newY >= 0 && newY < rows) {
+            currentAimY = newY;
+        }
+    }
+
     public IntegerProperty scoreProperty() {
         return this.score;
     }

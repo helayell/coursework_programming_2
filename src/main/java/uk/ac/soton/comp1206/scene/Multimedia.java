@@ -7,19 +7,18 @@ import javafx.scene.media.MediaPlayer;
  * The Multimedia class handles playing audio and background music for the game.
  */
 public class Multimedia {
-    private MediaPlayer audioPlayer;
+    private static MediaPlayer audioPlayer;
     private static MediaPlayer musicPlayer;
 
     /**
-     * Plays an audio file once. This method is typically used for sound effects.
-     * It loads the audio from the classpath, suitable for use in a packaged JAR.
+     * Plays an audio file once. This method is typically used for sound effects
      *
      * @param resourcePath The classpath resource path of the audio file.
      */
-    public void playAudio(String resourcePath) {
+    public static void playAudio(String resourcePath) {
         try {
             // Loading media from classpath resources
-            Media sound = new Media(getClass().getResource(resourcePath).toExternalForm());
+            Media sound = new Media(Multimedia.class.getResource(resourcePath).toExternalForm());
             if (audioPlayer != null) {
                 audioPlayer.stop(); // Stop any currently playing audio
             }

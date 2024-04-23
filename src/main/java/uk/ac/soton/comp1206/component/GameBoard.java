@@ -1,5 +1,6 @@
 package uk.ac.soton.comp1206.component;
 
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import org.apache.logging.log4j.LogManager;
@@ -55,6 +56,14 @@ public class GameBoard extends GridPane {
      * The listener to call when a specific block is clicked
      */
     private BlockClickedListener blockClickedListener;
+
+
+    public interface RightClickListener {
+
+        void rightClick(GameBlock gameBlock);
+    }
+
+    private RightClickListener rightClickListener;
 
 
     /**
@@ -159,18 +168,32 @@ public class GameBoard extends GridPane {
         this.blockClickedListener = listener;
     }
 
+    public void setOnRightClicked(RightClickListener listener) {
+        this.rightClickListener = listener;
+    }
+
     /**
-     * Triggered when a block is clicked. Call the attached listener.
+     * Triggered when a block is clicked. Call the attached listener depending on the mouse button used.
      * @param event mouse event
      * @param block block clicked on
      */
     private void blockClicked(MouseEvent event, GameBlock block) {
         logger.info("Block clicked: {}", block);
 
-        if(blockClickedListener != null) {
-            blockClickedListener.blockClicked(block);
+        // Check the mouse button to determine the type of click
+        if (event.getButton() == MouseButton.PRIMARY) {
+            // Handle left-click
+            if (blockClickedListener != null) {
+                blockClickedListener.blockClicked(block);
+            }{}
+        } else if (event.getButton() == MouseButton.SECONDARY) {
+            // Handle right-click
+            if (rightClickListener != null) {
+                rightClickListener.rightClick(block);
+            }
         }
     }
+
 
     public int getCols() {
         return cols;
