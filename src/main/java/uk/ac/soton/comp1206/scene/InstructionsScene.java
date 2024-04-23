@@ -64,7 +64,7 @@ public class InstructionsScene extends BaseScene {
             /* Displays the game piece blocks on the PieceBoard
             The blocks are retrieved from the GamePiece instance
              */
-            pieceBoard.displayPiece(piece.getBlocks());
+            pieceBoard.displayPiece(piece);
             grid.add(pieceBoard, 15, 5); // Arrange in 5 columns
         }
 

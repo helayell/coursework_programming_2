@@ -181,8 +181,8 @@ public class ChallengeScene extends BaseScene implements NextPieceListener {
 
     @Override
     public void nextPiece(GamePiece nextPiece, GamePiece followingPiece) {
-        pieceBoard.displayPiece(nextPiece.getBlocks()); // Display the next piece
-        followingPieceBoard.displayPiece(followingPiece.getBlocks()); // Display the following piece
+        pieceBoard.displayPiece(nextPiece); // Display the next piece
+        followingPieceBoard.displayPiece(followingPiece); // Display the following piece
     }
 
     private void rotateNextPiece(GameBlock block) {

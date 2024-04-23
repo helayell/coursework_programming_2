@@ -2,6 +2,7 @@ package uk.ac.soton.comp1206.component;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import uk.ac.soton.comp1206.game.GamePiece;
 
 /**
  * A specialized GameBoard for displaying upcoming game pieces in Tetris-like games.
@@ -30,25 +31,12 @@ public class PieceBoard extends GameBoard {
      * @param piece The 2D array representing the piece to display, where each element's value corresponds to a color index.
      */
 
-    public void displayPiece(int[][] piece) {
+    public void displayPiece(GamePiece piece) {
+
         clearGrid(); // Clear previous pieces
+        grid.playPiece(piece,1,1);
 
-        int centerX = (getCols() - piece[0].length) / 2;
-        int startY = (getRows() - piece.length) / 2;
 
-        for (int y = 0; y < piece.length; y++) {
-            for (int x = 0; x < piece[y].length; x++) {
-                int gridX = centerX + x;
-                int gridY = startY + y;
-                if (piece[y][x] != 0) {
-                    GameBlock block = getBlock(gridX, gridY);
-                    if (block != null) {
-                        block.setValue(piece[y][x]);
-                        block.paint();
-                    }
-                }
-            }
-        }
 
         // Add indicator on the central block
         GameBlock centerBlock = getBlock(getCols() / 2, getRows() / 2);
