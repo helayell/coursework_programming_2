@@ -8,11 +8,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import uk.ac.soton.comp1206.component.GameBlock;
 import uk.ac.soton.comp1206.component.GameBlockCoordinate;
+import uk.ac.soton.comp1206.event.LineClearedListener;
 import uk.ac.soton.comp1206.event.NextPieceListener;
 import uk.ac.soton.comp1206.scene.Multimedia;
 
 import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 
 /**
  * The Game class handles the main logic, state and properties of the TetrECS game. Methods to manipulate the game state
@@ -22,6 +24,8 @@ public class Game {
 
     private NextPieceListener nextPieceListener;
     private static GamePiece followingPiece; // Tracks the following piece
+    private LineClearedListener lineClearedListener;
+
 
     private static final Logger logger = LogManager.getLogger(Game.class);
 
@@ -71,6 +75,21 @@ public class Game {
     public void setNextPieceListener(NextPieceListener listener) {
         this.nextPieceListener = listener;
     }
+
+    public void setLineClearedListener(LineClearedListener listener) {
+        this.lineClearedListener = listener;
+    }
+
+    /**
+     * Notify the listener when lines are cleared.
+     * @param clearedBlocks the set of blocks that were cleared
+     */
+    protected void notifyLineCleared(Set<GameBlockCoordinate> clearedBlocks) {
+        if (lineClearedListener != null) {
+            lineClearedListener.onLineCleared(clearedBlocks);
+        }
+    }
+
 
     /**
      *  Method to generate or retrieve the next piece
@@ -219,6 +238,7 @@ public class Game {
                     lineClearedCount,
                     clearedBlocks.size(),
                     getScore());
+            lineClearedListener.onLineCleared(clearedBlocks);
             // Increase multiplier after score is applied
             multiplier.set(multiplier.get() + 1);
             logger.info("Multiplier increased to {}", multiplier.get());

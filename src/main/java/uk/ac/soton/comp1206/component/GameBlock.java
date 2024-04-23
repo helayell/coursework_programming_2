@@ -1,5 +1,6 @@
 package uk.ac.soton.comp1206.component;
 
+import javafx.animation.AnimationTimer;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.value.ObservableValue;
@@ -264,6 +265,36 @@ public class GameBlock extends Canvas {
         }// else {
             // Logs a warning if the value is bound and cannot be changed
             //logger.warn("Attempted to set a bound value for GameBlock at position (" + x + ", " + y + ")");
-        }
+    }
+
+    /**
+     * Initiates a fade-out effect on this block.
+     */
+    public void fadeOut() {
+        final long startNanoTime = System.nanoTime();
+        new AnimationTimer() {
+            public void handle(long currentNanoTime) {
+                double t = (currentNanoTime - startNanoTime) / 1_000_000_000.0; // convert to seconds
+                double opacity = 1.0 - t; // Fade out over one second
+
+                if (opacity <= 0) {
+                    this.stop();
+                    setValue(0); // Ensure the block is set to empty after fade out
+                    paintEmpty();
+                    return;
+                }
+
+                paintFade(opacity);
+            }
+        }.start();
+    }
+
+    private void paintFade(double opacity) {
+        var gc = getGraphicsContext2D();
+        clearBlock(gc);
+        Color fadedColor = new Color(0, 0, 0, opacity); // Assuming black fade for simplicity
+        gc.setFill(fadedColor);
+        gc.fillRect(0, 0, width, height);
+    }
 }
 

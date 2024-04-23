@@ -8,6 +8,8 @@ import org.apache.logging.log4j.Logger;
 import uk.ac.soton.comp1206.event.BlockClickedListener;
 import uk.ac.soton.comp1206.game.Grid;
 
+import java.util.Set;
+
 /**
  * A GameBoard is a visual component to represent the visual GameBoard.
  * It extends a GridPane to hold a grid of GameBlocks.
@@ -201,5 +203,18 @@ public class GameBoard extends GridPane {
 
     public int getRows() {
         return rows;
+    }
+
+    /**
+     * Fades out a set of blocks specified by their coordinates.
+     * @param clearedBlocks the coordinates of the blocks to fade out
+     */
+    public void fadeOut(Set<GameBlockCoordinate> clearedBlocks) {
+        clearedBlocks.forEach(coord -> {
+            GameBlock block = getBlock(coord.getX(), coord.getY());
+            if (block != null) {
+                block.fadeOut();
+            }
+        });
     }
 }

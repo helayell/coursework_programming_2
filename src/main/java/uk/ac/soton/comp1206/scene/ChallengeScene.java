@@ -26,6 +26,7 @@ public class ChallengeScene extends BaseScene implements NextPieceListener {
     protected Game game;
     private final PieceBoard pieceBoard;
     private final PieceBoard followingPieceBoard;
+    private GameBoard gameBoard;
 
 
 
@@ -127,6 +128,13 @@ public class ChallengeScene extends BaseScene implements NextPieceListener {
         game = new Game(5, 5);
         game.setNextPieceListener(this);
         game.generateNextPiece();  // Triggers the first piece generation
+        game.setNextPieceListener(this);
+        game.setLineClearedListener(clearedBlocks -> {
+            if (gameBoard != null) {
+                gameBoard.fadeOut(clearedBlocks);
+            }
+        });
+
     }
 
 
