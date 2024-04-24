@@ -6,9 +6,7 @@ import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import uk.ac.soton.comp1206.component.PieceBoard;
@@ -22,8 +20,9 @@ public class InstructionsScene extends BaseScene {
 
     /**
      * Constructs a new InstructionsScene with the specified GameWindow.
+     *
+     * @param gameWindow The GameWindow associated with this scene.
      */
-
     public InstructionsScene(GameWindow gameWindow) {
         super(gameWindow);
     }
@@ -36,7 +35,11 @@ public class InstructionsScene extends BaseScene {
         root = new GamePane(gameWindow.getWidth(), gameWindow.getHeight());
         root.getStyleClass().add("gamepane");
 
+
+
         StackPane instructionsPane = new StackPane();
+        instructionsPane.setMaxHeight(gameWindow.getHeight());
+        instructionsPane.getStyleClass().add("instructions-background");
         root.getChildren().add(instructionsPane);
 
         VBox instructionsBox = new VBox(20);
@@ -45,33 +48,35 @@ public class InstructionsScene extends BaseScene {
 
         // Grid pane for displaying PieceBoards in a grid layout
         GridPane grid = new GridPane();
-        grid.setAlignment(Pos.TOP_RIGHT);
-        grid.setHgap(10);// Sets horizontal gaps between grid cells to 10 pixels
-        grid.setVgap(10);// Sets vertical gaps between grid cells to 10 pixels
+        grid.setAlignment(Pos.BASELINE_CENTER);
+        grid.setHgap(7);// Sets horizontal gaps between grid cells to 7 pixels
+        grid.setVgap(7);// Sets vertical gaps between grid cells to 7 pixels
         grid.setPadding(new Insets(20)); // adds padding of 20 padding values all around
         instructionsBox.getChildren().add(grid);// Adds the grid to the VBox
 
-        // Loop to create and display each game piece
+
+        /*
+         Loop to create and display each game piece in a 5x3 grid
+         We create a grid with 5 columns and a number of rows that
+         depends on the total number of pieces.
+         */
+        // Loop to create and display each game piece in a 5x3 grid
+        int numCols = 5; // Number of columns
         for (int i = 0; i < GamePiece.PIECES; i++) {
-            /* Create a game piece using the method in GamePiece class
-             'i' iterates from 0 to the total number of pieces minus one (15 pieces in total)
-             */
-            GamePiece piece = GamePiece.createPiece(i);
-            /* Initializes a new PieceBoard to display the game pieces
-             The PieceBoard is set with dimensions of 3x3 and size 100x100 pixels
-             */
-            PieceBoard pieceBoard = new PieceBoard(3, 3, 100, 100);
-            /* Displays the game piece blocks on the PieceBoard
-            The blocks are retrieved from the GamePiece instance
-             */
-            pieceBoard.displayPiece(piece);
-            grid.add(pieceBoard, 15, 5); // Arrange in 5 columns
+            GamePiece piece = GamePiece.createPiece(i); // Create a new game piece
+            PieceBoard pieceBoard = new PieceBoard(3, 3, 50, 50); // Create a new PieceBoard
+            pieceBoard.displayPiece(piece); // Display the game piece on the PieceBoards
+
+            // Calculate column and row based on the piece index
+            int col = i % numCols;
+            int row = i / numCols;
+            grid.add(pieceBoard, col, row);
         }
 
 
         // Load and display the instructions image
         ImageView imageView = new ImageView(new Image(getClass().getResourceAsStream("/images/instructions.png")));
-        imageView.setFitWidth(gameWindow.getWidth() * 0.5); // Set width to 80% of window
+        imageView.setFitWidth(gameWindow.getWidth() * 0.7); // Set width to 70% of window
         imageView.setPreserveRatio(true);
         instructionsBox.getChildren().add(imageView);
 

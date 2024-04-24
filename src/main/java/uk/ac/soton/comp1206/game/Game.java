@@ -1,5 +1,6 @@
 package uk.ac.soton.comp1206.game;
 
+import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -8,13 +9,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import uk.ac.soton.comp1206.component.GameBlock;
 import uk.ac.soton.comp1206.component.GameBlockCoordinate;
+import uk.ac.soton.comp1206.event.GameLoopListener;
 import uk.ac.soton.comp1206.event.LineClearedListener;
 import uk.ac.soton.comp1206.event.NextPieceListener;
 import uk.ac.soton.comp1206.scene.Multimedia;
 
-import java.util.HashSet;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 /**
  * The Game class handles the main logic, state and properties of the TetrECS game. Methods to manipulate the game state
@@ -23,8 +23,13 @@ import java.util.Set;
 public class Game {
 
     private NextPieceListener nextPieceListener;
-    private static GamePiece followingPiece; // Tracks the following piece
+    private  GamePiece followingPiece; // Tracks the following piece
     private LineClearedListener lineClearedListener;
+    private Timer gameTimer;
+    private GameLoopListener gameLoopListener;
+    private NextPieceListener followingPieceListener = null;
+
+
 
 
     private static final Logger logger = LogManager.getLogger(Game.class);
@@ -80,6 +85,57 @@ public class Game {
         this.lineClearedListener = listener;
     }
 
+
+    public void gameOver() {
+        if (gameTimer != null) {
+            gameTimer.cancel();// Stop the game timer
+        }
+        logger.info("Game Over. Final score: {}", getScore());
+
+        // Notify any listeners or UI components that the game is over
+        Platform.runLater(() -> {
+            if (gameLoopListener != null) {
+                gameLoopListener.onGameOver();
+            }
+        });
+    }
+
+    private void gameLoop() {
+        TimerTask task = new TimerTask() {
+            @Override
+            public void run() {
+                Platform.runLater(() -> {
+                    fireGameLoopEnd();
+                    // All changes that affect the UI must be placed within this block
+                    setLives(getLives() - 1);
+                    multiplier.set(1.0);
+                    nextPiece();
+                    if (getLives() <= 0) {
+                        logger.info("Game Over");
+                        gameOver();
+                    } else {
+                        // Reset the timer within the FX thread to prevent IllegalStateException
+                        nextPiece();
+                        resetTimer();
+                        fireGameLoopStart();
+                    }
+                });
+            }
+        };
+        gameTimer.schedule(task, getTimerDelay());
+    }
+
+    private void resetTimer() {
+        if (gameTimer != null) {
+            gameTimer.cancel();  // Cancel the current running tasks
+            gameTimer = new Timer("Game Timer");  // Reinitialize the timer
+            gameLoop();  // This internally calls `fireGameLoopStart()`
+        }
+    }
+
+
+
+
     /**
      * Notify the listener when lines are cleared.
      * @param clearedBlocks the set of blocks that were cleared
@@ -89,6 +145,24 @@ public class Game {
             lineClearedListener.onLineCleared(clearedBlocks);
         }
     }
+
+    public void setOnGameLoopListener(GameLoopListener listener) {
+        this.gameLoopListener = listener;
+    }
+
+    protected void fireGameLoopStart() {
+        if (gameLoopListener != null) {
+            gameLoopListener.onGameLoopStart();
+        }
+    }
+
+    protected void fireGameLoopEnd() {
+        if (gameLoopListener != null) {
+            gameLoopListener.onGameLoopEnd();
+        }
+    }
+
+
 
 
     /**
@@ -101,7 +175,7 @@ public class Game {
 
         // Notify the listener with the new piece
         if (nextPieceListener != null) {
-            nextPieceListener.nextPiece(nextPiece, followingPiece);
+            nextPieceListener.nextPiece(nextPiece);
         }
     }
 
@@ -111,6 +185,9 @@ public class Game {
     public void start() {
         logger.info("Starting game");
         initialiseGame();
+        // Initialize timer
+        gameTimer = new Timer("Game Timer");
+        gameLoop(); // Start the initial timer task
     }
 
     /**
@@ -119,6 +196,31 @@ public class Game {
     public void initialiseGame() {
         logger.info("Initialising game");
     }
+
+    /**
+     * Calculate the delay time for the timer based on the current level of the game.
+     * The delay starts at 12000 milliseconds and reduces by 500 milliseconds each level,
+     * with a minimum delay of 2500 milliseconds.
+     *
+     * @return the calculated delay in milliseconds.
+     */
+    public int getTimerDelay() {
+        int delay = 12000 - 500 * getLevel();
+        return Math.max(2500, delay);
+    }
+
+    /**
+     * Stops the game timer and cleans up any resources. It should be called
+     * when the game is ending or needs to be paused.
+     */
+    public void stopGame() {
+        if (gameTimer != null) {
+            gameTimer.cancel();
+            logger.info("Game stopped");
+        }
+    }
+
+
 
     /**
      * Handle what should happen when a particular block is clicked
@@ -136,35 +238,36 @@ public class Game {
             grid.playPiece(currentPiece, x, y); //PLace piece on grid
             afterPiece(); // Handles line clearance
             nextPiece(); // Spawns next piece
+            resetTimer(); // Reset the timer with new delay
         } else {
             logger.info("Cannot place piece");
         }
         //Get the new value for this block
 
         Multimedia.playAudio("/sounds/place.wav");
-
-        //Update the grid with the new value
-
     }
 
     private static GamePiece currentPiece; // Tracks current piece
     private static final Random random = new Random();
 
-    public static void spawnPiece() {
+    public void spawnPiece() {
         // Spawn a piece using a random index between 0 and the total number of pieces - 1
         currentPiece = GamePiece.createPiece(random.nextInt(GamePiece.PIECES));
         logger.info("Spawning new piece: {}", currentPiece);
     }
 
 
-    private static void spawnFollowingPiece() {
+    private void spawnFollowingPiece() {
         followingPiece = GamePiece.createPiece(random.nextInt(GamePiece.PIECES));
         logger.info("Following new piece: {}", followingPiece);
     }
 
-    public static void nextPiece() {
+    public void nextPiece() {
         currentPiece = followingPiece;
         spawnFollowingPiece(); // Spawn a new following piece
+        if (followingPieceListener != null) {
+            followingPieceListener.nextPiece(currentPiece);
+        }
         logger.info("New current piece: {}, New following piece spawned: {}, Multiplier: {}", currentPiece, followingPiece, multiplier.get());
     }
 
@@ -280,9 +383,7 @@ public class Game {
         logger.info("Swapped current piece with following piece. Current: {}, Following: {}", currentPiece, followingPiece);
 
         // Notify listeners about the swap, update both current and following pieces on the UI
-        if (nextPieceListener != null) {
-            nextPieceListener.nextPiece(currentPiece, followingPiece);
-        }
+
     }
 
     public void dropPieceAtAim() {
@@ -312,6 +413,10 @@ public class Game {
         if (newY >= 0 && newY < rows) {
             currentAimY = newY;
         }
+    }
+
+    public GamePiece getFollowingPiece() {
+        return followingPiece;
     }
 
     public IntegerProperty scoreProperty() {

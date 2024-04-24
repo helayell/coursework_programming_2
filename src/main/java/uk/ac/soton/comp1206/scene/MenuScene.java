@@ -86,7 +86,7 @@ public class MenuScene extends BaseScene {
      * Shows the settings for the game
      */
     private void showSettings(ActionEvent actionEvent) {
-
+        gameWindow.loadScene(new SettingsScene(gameWindow));
         logger.info("Settings button clicked");
 
     }

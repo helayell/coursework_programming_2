@@ -1,15 +1,24 @@
 package uk.ac.soton.comp1206.scene;
 
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
+import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import uk.ac.soton.comp1206.component.GameBlock;
 import uk.ac.soton.comp1206.component.GameBoard;
 import uk.ac.soton.comp1206.component.PieceBoard;
+import uk.ac.soton.comp1206.event.GameLoopListener;
 import uk.ac.soton.comp1206.event.NextPieceListener;
 import uk.ac.soton.comp1206.game.Game;
 import uk.ac.soton.comp1206.game.GamePiece;
@@ -27,8 +36,8 @@ public class ChallengeScene extends BaseScene implements NextPieceListener {
     private final PieceBoard pieceBoard;
     private final PieceBoard followingPieceBoard;
     private GameBoard gameBoard;
-
-
+    private Rectangle timerBar;
+    private Timeline timeline;
 
     /**
      * Create a new Single Player challenge scene
@@ -73,12 +82,47 @@ public class ChallengeScene extends BaseScene implements NextPieceListener {
         board.setOnBlockClick(this::blockClicked);
         // Adds the UI elements
         setupUIElements(mainPane);
-
+        setupTimerBar(); // Initialize and set up the timer bar
+        mainPane.setBottom(timerBar); // Add timer bar to the layout
         // Position both PieceBoards in the scene
         VBox rightPanel = new VBox(10); // Vertical Box with spacing of 10
         rightPanel.getChildren().addAll(pieceBoard, followingPieceBoard);
         mainPane.setRight(rightPanel);
     }
+
+    /**
+     * Sets up the timer bar for visualizing the remaining time in the game.
+     */
+    private void setupTimerBar() {
+        // Create a new Rectangle for the timer bar with an initial width of 300 pixels and a height of 20 pixels.
+        // The color is set to green initially.
+        timerBar = new Rectangle(0, 0, 300, 20);  // Initial width, adjust as needed
+        timerBar.setFill(Color.GREEN);  // Initial color, changes based on time left
+
+        /*
+         Create a new Timeline with two KeyFrames.
+         The first KeyFrame has a Duration of zero and
+         sets the width and fill properties of the timerBar.
+         The second KeyFrame has a Duration based on the game's
+         timer delay (in seconds) and sets the width and fill properties
+         of the timerBar to 0 and red, respectively.
+         */
+        timeline = new Timeline(new KeyFrame(
+                Duration.ZERO,
+                new KeyValue(timerBar.widthProperty(), 300),
+                new KeyValue(timerBar.fillProperty(), Color.GREEN)
+        ), new KeyFrame(
+                Duration.seconds(game.getTimerDelay() / 1000),
+                new KeyValue(timerBar.widthProperty(), 0),
+                new KeyValue(timerBar.fillProperty(), Color.RED)
+        ));
+
+        // Set the cycle count of the Timeline to Animation.INDEFINITE to continuously animate the timer bar.
+        timeline.setCycleCount(Animation.INDEFINITE);
+    }
+
+
+
 
     /**
      * Sets up the UI elements for the game, including the stats box and labels.
@@ -127,14 +171,43 @@ public class ChallengeScene extends BaseScene implements NextPieceListener {
         //Start new game
         game = new Game(5, 5);
         game.setNextPieceListener(this);
-        game.generateNextPiece();  // Triggers the first piece generation
-        game.setNextPieceListener(this);
+        // Triggers the first piece generation
+        game.generateNextPiece();
+        // Set a LineClearedListener for the game to handle faded-out blocks
         game.setLineClearedListener(clearedBlocks -> {
             if (gameBoard != null) {
                 gameBoard.fadeOut(clearedBlocks);
             }
         });
+        // Set a GameLoopListener for the game to handle game loop events
+        game.setOnGameLoopListener(new GameLoopListener() {
+            @Override
+            public void onGameLoopStart() {
+                Platform.runLater(() -> {
+                    if (timeline != null) {  // Ensure the timeline is initialized
+                        timerBar.setWidth(300); // Reset the timer bar width
+                        timerBar.setFill(Color.GREEN); // Reset the color to green
+                        timeline.playFromStart(); // Start the timeline animation
+                    }
+                });
+            }
 
+            @Override
+            public void onGameLoopEnd() {
+                Platform.runLater(() -> {
+                    if (timeline != null) {  // Ensure the timeline is initialized
+                        timeline.stop(); // Stop the timeline
+                        timerBar.setWidth(300); // Reset the width for a new start
+                        timerBar.setFill(Color.GREEN); // Reset the color for clarity
+                    }
+                });
+            }
+
+            @Override
+            public void onGameOver() {
+
+            }
+        });
     }
 
 
@@ -143,6 +216,7 @@ public class ChallengeScene extends BaseScene implements NextPieceListener {
      */
     @Override
     public void initialise() {
+        game.setNextPieceListener(this::nextPiece);
         logger.info("Initialising Challenge");
         game.start();
         Multimedia.playBackgroundMusic("/music/game.wav"); // Play background music for the game scene
@@ -179,15 +253,14 @@ public class ChallengeScene extends BaseScene implements NextPieceListener {
         gameWindow.startMenu();
     }
 
-    @Override
-    public void nextPiece(GamePiece nextPiece, GamePiece followingPiece) {
-        pieceBoard.displayPiece(nextPiece); // Display the next piece
-        followingPieceBoard.displayPiece(followingPiece); // Display the following piece
-    }
-
     private void rotateNextPiece(GameBlock block) {
         game.rotateCurrentPiece();
     }
 
+    @Override
+    public void nextPiece(GamePiece nextPiece) {
+        pieceBoard.displayPiece(nextPiece);
+        followingPieceBoard.displayPiece(game.getFollowingPiece());
+    }
 }
 

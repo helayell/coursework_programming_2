@@ -10,8 +10,8 @@ public interface NextPieceListener {
 
     /**
      * Method called when the game generates a new piece.
-     * @param followingPiece the following piece to be handled.
-     * @param nextPiece the next game piece to be handled.
+     * @param piece the next game piece to be handled.
      */
-    void nextPiece(GamePiece nextPiece, GamePiece followingPiece);
+    void nextPiece(GamePiece piece);
+
 }

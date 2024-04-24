@@ -15,9 +15,14 @@
     -fx-background-image: url("../images/2.jpg");
     -fx-background-size: cover;
 }
+.instructions-background{
+    -fx-background-image: url("../images/3.jpg");
+    -fx-background-size: cover;
+}
 
 .menuButton {
     -fx-padding: 8px 15px;
+    -fx-font-family: "Orbiton";
     -fx-background-color: #333;
     -fx-text-fill: white;
     -fx-font-size: 16px;

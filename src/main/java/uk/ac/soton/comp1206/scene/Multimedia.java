@@ -60,4 +60,13 @@ public class Multimedia {
             musicPlayer.stop();
         }
     }
+
+    /**
+     * Unmutes the background music.
+     */
+    public static void unmuteBackgroundMusic() {
+        if (musicPlayer != null) {
+            musicPlayer.setMute(false);
+        }
+    }
 }
