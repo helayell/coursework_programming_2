@@ -1,3 +1,4 @@
+
 package uk.ac.soton.comp1206.game;
 
 import javafx.application.Platform;
@@ -77,29 +78,48 @@ public class Game {
     private static final DoubleProperty multiplier = new SimpleDoubleProperty(1.0);
 
 
+    /**
+     * Sets the listener for next piece events.
+     *
+     * @param listener The listener to be notified when a new piece is generated.
+     */
     public void setNextPieceListener(NextPieceListener listener) {
-        this.nextPieceListener = listener;
+        this.nextPieceListener = listener; // Store the listener for future notifications
     }
 
+    /**
+     * Sets the listener for line cleared events.
+     *
+     * @param listener The listener to be notified when a line is cleared.
+     */
     public void setLineClearedListener(LineClearedListener listener) {
-        this.lineClearedListener = listener;
+        this.lineClearedListener = listener; // Store the listener for future notifications
     }
 
+
+    /**
+     * Ends the game and performs necessary cleanup.
+     */
 
     public void gameOver() {
+        // Check if the game timer is not null
         if (gameTimer != null) {
-            gameTimer.cancel();// Stop the game timer
+            gameTimer.cancel();// Stop the game timer to prevent further updates
         }
         logger.info("Game Over. Final score: {}", getScore());
 
         // Notify any listeners or UI components that the game is over
+        // Use Platform.runLater to ensure this code is executed on the JavaFX application thread
         Platform.runLater(() -> {
             if (gameLoopListener != null) {
-                gameLoopListener.onGameOver();
+                gameLoopListener.onGameLoopEnd(); // Notify the listener that the game loop has ended
             }
         });
     }
 
+    /**
+     * Starts the game loop, which controls the game's timing and updates.
+     */
     private void gameLoop() {
         TimerTask task = new TimerTask() {
             @Override
@@ -107,9 +127,9 @@ public class Game {
                 Platform.runLater(() -> {
                     fireGameLoopEnd();
                     // All changes that affect the UI must be placed within this block
-                    setLives(getLives() - 1);
-                    multiplier.set(1.0);
-                    nextPiece();
+                    setLives(getLives() - 1); // Decrement the number of lives
+                    multiplier.set(1.0); // Reset the multiplier
+                    nextPiece(); // Generate the next piece
                     if (getLives() <= 0) {
                         logger.info("Game Over");
                         gameOver();
@@ -124,7 +144,9 @@ public class Game {
         };
         gameTimer.schedule(task, getTimerDelay());
     }
-
+    /**
+     * Resets the game timer and restarts the game loop.
+     */
     private void resetTimer() {
         if (gameTimer != null) {
             gameTimer.cancel();  // Cancel the current running tasks
@@ -146,16 +168,26 @@ public class Game {
         }
     }
 
+    /**
+     * Sets the listener for game loop events.
+     *
+     * @param listener the listener to notify when the game loop starts or ends
+     */
     public void setOnGameLoopListener(GameLoopListener listener) {
         this.gameLoopListener = listener;
     }
 
+    /**
+     * Notifies the listener that the game loop has started.
+     */
     protected void fireGameLoopStart() {
         if (gameLoopListener != null) {
             gameLoopListener.onGameLoopStart();
         }
     }
-
+    /**
+     * Notifies the listener that the game loop has ended.
+     */
     protected void fireGameLoopEnd() {
         if (gameLoopListener != null) {
             gameLoopListener.onGameLoopEnd();
@@ -168,7 +200,6 @@ public class Game {
     /**
      *  Method to generate or retrieve the next piece
      */
-
     public void generateNextPiece() {
         GamePiece nextPiece = followingPiece;
         followingPiece = GamePiece.createPiece((int) (Math.random() * GamePiece.PIECES));
@@ -242,35 +273,50 @@ public class Game {
         } else {
             logger.info("Cannot place piece");
         }
-        //Get the new value for this block
-
         Multimedia.playAudio("/sounds/place.wav");
     }
 
     private static GamePiece currentPiece; // Tracks current piece
     private static final Random random = new Random();
 
+    /**
+     * Spawns a new random game piece.
+     */
     public void spawnPiece() {
         // Spawn a piece using a random index between 0 and the total number of pieces - 1
         currentPiece = GamePiece.createPiece(random.nextInt(GamePiece.PIECES));
         logger.info("Spawning new piece: {}", currentPiece);
     }
 
-
+    /**
+     * Spawns a new random game piece to be used as the next piece.
+     */
     private void spawnFollowingPiece() {
         followingPiece = GamePiece.createPiece(random.nextInt(GamePiece.PIECES));
         logger.info("Following new piece: {}", followingPiece);
     }
-
+    /**
+     * Advances to the next game piece.
+     */
     public void nextPiece() {
         currentPiece = followingPiece;
-        spawnFollowingPiece(); // Spawn a new following piece
-        if (followingPieceListener != null) {
-            followingPieceListener.nextPiece(currentPiece);
-        }
-        logger.info("New current piece: {}, New following piece spawned: {}, Multiplier: {}", currentPiece, followingPiece, multiplier.get());
+        generateNextPiece(); // Ensure this method generates a new piece
+        logger.info("Next piece set. Current: {}, Next: {}", currentPiece, followingPiece);
+
+        // Notify UI about the update
+        Platform.runLater(() -> {
+            if (nextPieceListener != null) {
+                nextPieceListener.nextPiece(currentPiece);
+            }
+        });
     }
 
+    /**
+     * Updates the score based on the number of lines and blocks cleared.
+     *
+     * @param numberOfLines the number of lines cleared
+     * @param numberOfBlocksCleared the number of blocks cleared
+     */
     public void updateScore(int numberOfLines, int numberOfBlocksCleared) {
         if (numberOfLines > 0) {
             // Calculate the score
@@ -287,50 +333,51 @@ public class Game {
                 level.set(newLevel);
                 logger.info("Level up! New level: {}", newLevel);
             }
-
             logger.info("Score updated: {} points added for clearing {} lines and {} blocks. New score: {}", scoreToAdd, numberOfLines, numberOfBlocksCleared, score.get());
         }
     }
 
+    /**
+     * Checks for full lines after placing a piece and updates the score accordingly.
+     */
     public void afterPiece() {
         logger.info("Checking for full lines after placing piece.");
-
+        // Initialize a set to store the cleared blocks
         HashSet<GameBlockCoordinate> clearedBlocks = new HashSet<>();
         int lineClearedCount = 0;
-
         // Clear full horizontal lines
         for (int y = 0; y < grid.getRows(); y++) {
             boolean isFullLine = true;
             for (int x = 0; x < grid.getCols(); x++) {
+                // Check if the cell is empty (0)
                 if (grid.get(x, y) == 0) {
                     isFullLine = false;
                     break;
                 }
             }
-
             if (isFullLine) {
-                lineClearedCount++;
+                lineClearedCount++; // Increment the line cleared count
                 for (int x = 0; x < grid.getCols(); x++) {
                     grid.set(x, y, 0); // Clear the line
-                    clearedBlocks.add(new GameBlockCoordinate(x, y));
+                    clearedBlocks.add(new GameBlockCoordinate(x, y)); // Add the cleared block to the set
                 }
             }
         }
-
         // Clear full vertical lines
         for (int x = 0; x < grid.getCols(); x++) {
             boolean isFullLine = true;
             for (int y = 0; y < grid.getRows(); y++) {
+                // Check if the cell is empty (0)
                 if (grid.get(x, y) == 0) {
                     isFullLine = false;
                     break;
                 }
             }
             if (isFullLine) {
-                lineClearedCount++;
+                lineClearedCount++; // Increment the line cleared count
                 for (int y = 0; y < grid.getRows(); y++) {
                     grid.set(x, y, 0); // Clear the line
-                    clearedBlocks.add(new GameBlockCoordinate(x, y));
+                    clearedBlocks.add(new GameBlockCoordinate(x, y)); // Add the cleared block to the set
                 }
             }
         }
@@ -341,7 +388,7 @@ public class Game {
                     lineClearedCount,
                     clearedBlocks.size(),
                     getScore());
-            lineClearedListener.onLineCleared(clearedBlocks);
+            lineClearedListener.onLineCleared(clearedBlocks); // Notify the line cleared listener
             // Increase multiplier after score is applied
             multiplier.set(multiplier.get() + 1);
             logger.info("Multiplier increased to {}", multiplier.get());
@@ -359,33 +406,39 @@ public class Game {
         if (currentPiece != null) {
             // Rotate the piece
             currentPiece.rotate();
-
             Multimedia.playAudio("/sounds/rotate.wav");
-
-            // Optionally notify any listeners or update the game state
             logger.info("Current piece rotated: {}", currentPiece);
         } else {
             logger.warn("No current piece to rotate.");
         }
     }
 
+    /**
+     * Swaps the current piece with the following piece.
+     */
     public void swapCurrentPiece() {
+        // Check if either the current piece or following piece is null
         if (currentPiece == null || followingPiece == null) {
             logger.warn("Attempted to swap pieces when one or both pieces are null");
             return;
         }
 
+        // Temporarily store the current piece
         GamePiece temp = currentPiece;
+
+        // Swap the current piece with the following piece
         currentPiece = followingPiece;
         followingPiece = temp;
+
+        // Play a sound effect to indicate the swap
         Multimedia.playAudio("/sounds/pling.wav");
 
         logger.info("Swapped current piece with following piece. Current: {}, Following: {}", currentPiece, followingPiece);
-
-        // Notify listeners about the swap, update both current and following pieces on the UI
-
     }
 
+    /**
+     * Drops the current piece at the aimed position.
+     */
     public void dropPieceAtAim() {
         if (grid.canPlayPiece(currentPiece, currentAimX, currentAimY)) {
             grid.playPiece(currentPiece, currentAimX, currentAimY);
@@ -396,27 +449,37 @@ public class Game {
             Multimedia.playAudio("/sounds/place.wav");
             // Handle post-drop actions such as generating the next piece
         }
-
         Multimedia.playAudio("/sounds/place.wav");
-
     }
 
 
+    /**
+     * Moves the aim position by the specified delta values.
+     *
+     * @param dx the change in x-coordinate
+     * @param dy the change in y-coordinate
+     */
     public void moveAim(int dx, int dy) {
+        // Calculate the new aim position
         int newX = currentAimX + dx;
         int newY = currentAimY + dy;
 
-        // Check boundaries before updating the current aim position
+        // Check if the new position is within the grid boundaries
         if (newX >= 0 && newX < cols) {
+            // Update the x-coordinate of the aim position
             currentAimX = newX;
         }
         if (newY >= 0 && newY < rows) {
+            // Update the y-coordinate of the aim position
             currentAimY = newY;
         }
     }
 
     public GamePiece getFollowingPiece() {
         return followingPiece;
+    }
+    public GamePiece getCurrentPiece() {
+        return currentPiece;
     }
 
     public IntegerProperty scoreProperty() {

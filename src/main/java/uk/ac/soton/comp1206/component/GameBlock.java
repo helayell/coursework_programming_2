@@ -106,6 +106,11 @@ public class GameBlock extends Canvas {
         paint();
     }
 
+    /**
+     * Set the center indicator flag
+     *
+     * @param centerIndicator whether to display a center indicator
+     */
     public void setCenterIndicator(boolean centerIndicator) {
         this.centerIndicator = centerIndicator;
     }
@@ -115,6 +120,11 @@ public class GameBlock extends Canvas {
         this.setOnMouseExited(event -> highlight(false));
     }
 
+    /**
+     * Highlight the block on hover
+     *
+     * @param hover whether to highlight the block
+     */
     private void highlight(boolean hover) {
         if (hover) {
             getGraphicsContext2D().setStroke(Color.PURPLE); // Set hover color
@@ -125,70 +135,108 @@ public class GameBlock extends Canvas {
         }
         paint(); // Repaint to update visual state
     }
-
-
-
-
     /**
      * Handle painting of the block canvas
+     *
+     * This method is responsible for rendering the block's visual representation
+     * based on its current value and center indicator status.
      */
     public void paint() {
+        // Get the graphics context for the canvas
         var gc = getGraphicsContext2D();
-        clearBlock(gc); // Clear previous content
 
+        // Clear the previous content on the canvas
+        clearBlock(gc);
+
+        // Check if the block's value is 0, indicating an empty block
         if (value.get() == 0) {
+            // Paint the block as empty
             paintEmpty();
         } else {
+            // Paint the block with the corresponding color based on its value
             paintColor(COLOURS[value.get()]);
         }
-
-
+        // Check if the center indicator flag is set to true
         if (centerIndicator) {
+            // Create a gradient fill for the center indicator
             var gradient = new LinearGradient(0, 0, 1, 1, true, CycleMethod.NO_CYCLE,
                     new Stop(0.5, Color.GOLD),
                     new Stop(0, Color.PURPLE));
+
+            // Set the fill and stroke colors for the center indicator
             gc.setFill(gradient);
             gc.setStroke(Color.BLACK);
             gc.setLineWidth(0.65);
 
+            // Calculate the radius of the center indicator based on the block's size
             double radius = Math.min(width, height) * 0.65; // Adjust size as necessary
+
+            // Draw the center indicator as an oval shape
             gc.fillOval((width - radius) / 2, (height - radius) / 2, radius, radius);
         }
     }
 
+    /**
+     * Clear the block canvas by filling it with a transparent color
+     *
+     * This method is used to reset the block's visual representation before
+     * rendering a new value or state.
+     *
+     * @param gc the GraphicsContext object for the block canvas
+     */
     private void clearBlock(GraphicsContext gc) {
+        // Clear the entire block canvas by drawing a transparent rectangle
+        // over the entire area, effectively erasing any previous content
         gc.clearRect(0, 0, width, height);
     }
 
-
-
     /**
-     * Paint this canvas empty
+     * Paint this canvas empty, rendering a visually appealing empty block
+     *
+     * This method is used to render an empty block with a gradient fill and
+     * a black border, making it visually distinct from filled blocks.
      */
     private void paintEmpty() {
+        // Get the GraphicsContext object for the canvas
         var gc = getGraphicsContext2D();
 
-        // Clear
+        /* Clear the entire canvas by drawing a transparent rectangle
+         over the entire area, effectively erasing any previous content
+         */
         gc.clearRect(0, 0, width, height);
 
-        // Gradient fill for empty blocks to make them visually appealing
+        /* Create a gradient fill for the empty block, transitioning from
+         transparent to white to purple, making it visually appealing
+         */
         var gradient = new LinearGradient(0, 0, 1, 1, true, CycleMethod.NO_CYCLE,
                 new Stop(1, Color.TRANSPARENT),
                 new Stop(0, Color.WHITE));
-                new Stop(0.5, Color.PURPLE);
-        gc.setFill(gradient);
-        gc.fillRoundRect(0, 0, width, height, 10, 10);  // Rounded corners
+        new Stop(0.5, Color.PURPLE);
 
-        // Border
+        // Set the fill color to the gradient
+        gc.setFill(gradient);
+
+        /* Draw a rounded rectangle to fill the entire canvas, using the
+         gradient fill and rounded corners to create a visually appealing
+         empty block
+        */
+        gc.fillRoundRect(0, 0, width, height, 10, 10);
+
+        // Set the stroke color to black
         gc.setStroke(Color.BLACK);
+
+        /* Draw a border around the empty block using a rounded rectangle
+         with a black stroke color, making it visually distinct from
+         filled blocks
+         */
         gc.strokeRoundRect(0, 0, width, height, 10, 10);
     }
 
-
     /**
-     * Paint this canvas with the given colour
+     * Paint this canvas with the given colour, rendering a filled block
+     * with a 3D effect and a black border.
      *
-     * @param colour the colour to paint
+     * @param colour the colour to paint, which will be used to fill the block
      */
     private void paintColor(Paint colour) {
         var gc = getGraphicsContext2D();
@@ -196,12 +244,12 @@ public class GameBlock extends Canvas {
         // Clear
         gc.clearRect(0, 0, width, height);
 
-        // Drop shadow for a slight 3D effect
+        // Create a drop shadow effect to give the block a slight 3D appearance
         DropShadow ds = new DropShadow();
-        ds.setOffsetY(3.0);
-        ds.setOffsetX(3.0);
-        ds.setColor(Color.color(0, 0, 0, 0.5));
-        gc.setEffect(ds);
+        ds.setOffsetY(3.0); // Set the vertical offset of the shadow
+        ds.setOffsetX(3.0); // Set the horizontal offset of the shadow
+        ds.setColor(Color.color(0, 0, 0, 0.5)); // Set the colour of the shadow
+        gc.setEffect(ds); // Apply the drop shadow effect to the canvas
 
         // Colour fill with rounded corners
         gc.setFill(colour);
@@ -212,7 +260,6 @@ public class GameBlock extends Canvas {
         gc.strokeRoundRect(0, 0, width, height, 10, 10);
         gc.setEffect(null);  // Reset the effect so it does not affect other elements
     }
-
 
     /**
      * Get the column of this block
@@ -263,8 +310,8 @@ public class GameBlock extends Canvas {
             // Triggers a repaint of the block with the new value's color
             paint();
         }// else {
-            // Logs a warning if the value is bound and cannot be changed
-            //logger.warn("Attempted to set a bound value for GameBlock at position (" + x + ", " + y + ")");
+        // Logs a warning if the value is bound and cannot be changed
+        //logger.warn("Attempted to set a bound value for GameBlock at position (" + x + ", " + y + ")");
     }
 
     /**
@@ -289,12 +336,16 @@ public class GameBlock extends Canvas {
         }.start();
     }
 
+    /**
+     * Paints the block with a faded color based on the given opacity value.
+     *
+     * @param opacity The current opacity value of the block (between 0.0 and 1.0).
+     */
     private void paintFade(double opacity) {
         var gc = getGraphicsContext2D();
         clearBlock(gc);
-        Color fadedColor = new Color(0, 0, 0, opacity); // Assuming black fade for simplicity
+        Color fadedColor = Color.GREEN; // Assuming black fade for simplicity
         gc.setFill(fadedColor);
-        gc.fillRect(0, 0, width, height);
+        gc.fillRect(10, 10, width, height);
     }
 }
-

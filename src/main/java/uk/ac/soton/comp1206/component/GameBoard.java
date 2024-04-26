@@ -170,6 +170,11 @@ public class GameBoard extends GridPane {
         this.blockClickedListener = listener;
     }
 
+    /**
+     * Sets the listener for right-click events on this block.
+     *
+     * @param listener The listener to be notified when a right-click event occurs.
+     */
     public void setOnRightClicked(RightClickListener listener) {
         this.rightClickListener = listener;
     }

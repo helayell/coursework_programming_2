@@ -54,7 +54,7 @@ public class MenuScene extends BaseScene {
         title.getStyleClass().add("bigtitle");
         menuBox.getChildren().add(title);
 
-        //For now, let us just add a button that starts the game. I'm sure you'll do something way better.
+
         Button playButton = new Button("Play!");
         playButton.getStyleClass().add("menuButton");
         //Bind the button action to the startGame method in the menu
@@ -118,11 +118,22 @@ public class MenuScene extends BaseScene {
         });
 
     }
-
+    /**
+     * Applies a fade-in transition to the StackPane.
+     *
+     * @param pane the StackPane to apply the transition to
+     */
     private void applyFadeInTransition(StackPane pane) {
+        // Create a new FadeTransition with a duration of 0.5 seconds
         FadeTransition fadeTransition = new FadeTransition(Duration.seconds(0.5), pane);
+
+        // Set the initial opacity value to 0 (fully transparent)
         fadeTransition.setFromValue(0);
+
+        // Set the final opacity value to 1 (fully opaque)
         fadeTransition.setToValue(1);
+
+        // Play the transition
         fadeTransition.play();
     }
 

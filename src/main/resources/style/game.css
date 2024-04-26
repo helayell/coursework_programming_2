@@ -143,6 +143,13 @@
 .scorer {
 
 }
+.score-background{
+    -fx-background-image: url("../images/4.jpg");
+    -fx-background-size: cover;
+}
+.score-title{
+
+}
 
 .myscore {
     -fx-font-weight: 700;

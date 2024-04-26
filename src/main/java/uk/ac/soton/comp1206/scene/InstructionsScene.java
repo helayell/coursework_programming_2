@@ -32,16 +32,17 @@ public class InstructionsScene extends BaseScene {
      */
     @Override
     public void build() {
+        // Create the root pane with the game window's width and height
         root = new GamePane(gameWindow.getWidth(), gameWindow.getHeight());
         root.getStyleClass().add("gamepane");
 
-
-
+        // Create a stack pane for the instructions
         StackPane instructionsPane = new StackPane();
         instructionsPane.setMaxHeight(gameWindow.getHeight());
         instructionsPane.getStyleClass().add("instructions-background");
         root.getChildren().add(instructionsPane);
 
+        // Create a vertical box for the instructions
         VBox instructionsBox = new VBox(20);
         instructionsBox.setAlignment(Pos.CENTER);
         instructionsPane.getChildren().add(instructionsBox);

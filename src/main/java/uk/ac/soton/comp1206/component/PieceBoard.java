@@ -33,8 +33,7 @@ public class PieceBoard extends GameBoard {
 
     public void displayPiece(GamePiece piece) {
 
-        clearGrid(); // Clear previous pieces
-        grid.playPiece(piece,1,1);
+
 
 
 
@@ -44,14 +43,29 @@ public class PieceBoard extends GameBoard {
             centerBlock.setCenterIndicator(true); // Set a flag to draw a special indicator
             centerBlock.paint();
         }
+
+        if (piece != null) {
+            // Clear and set piece in UI
+            clearGrid();
+            grid.playPiece(piece, 1, 1); // Adjust as necessary for your grid system
+        } else {
+            logger.warn("Attempted to display a null piece.");
+        }
     }
+
 
     /**
      * Clears the grid by resetting all blocks to their default (empty) state.
      */
     private void clearGrid() {
+          //Iterate over each row in the grid.
         for (int y = 0; y < getRows(); y++) {
+            //Iterate over each column in the grid.
             for (int x = 0; x < getCols(); x++) {
+                /*
+                 * Get the block at the current position (x, y) and reset its value to 0.
+                 * This effectively clears the block, setting it to its default (empty) state.
+                 */
                 getBlock(x, y).setValue(0);
             }
         }

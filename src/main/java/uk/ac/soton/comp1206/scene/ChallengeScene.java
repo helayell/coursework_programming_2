@@ -1,3 +1,4 @@
+
 package uk.ac.soton.comp1206.scene;
 
 import javafx.animation.Animation;
@@ -32,11 +33,22 @@ import uk.ac.soton.comp1206.ui.GameWindow;
 public class ChallengeScene extends BaseScene implements NextPieceListener {
 
     private static final Logger logger = LogManager.getLogger(MenuScene.class);
+    // The game instance
     protected Game game;
+
+    // The piece board for the current piece
     private final PieceBoard pieceBoard;
+
+    // The piece board for the following piece
     private final PieceBoard followingPieceBoard;
+
+    // The game board where the pieces are played
     private GameBoard gameBoard;
+
+    // The timer bar that displays the remaining time
     private Rectangle timerBar;
+
+    // The timeline that controls the game timer
     private Timeline timeline;
 
     /**
@@ -94,8 +106,10 @@ public class ChallengeScene extends BaseScene implements NextPieceListener {
      * Sets up the timer bar for visualizing the remaining time in the game.
      */
     private void setupTimerBar() {
-        // Create a new Rectangle for the timer bar with an initial width of 300 pixels and a height of 20 pixels.
-        // The color is set to green initially.
+        /* Create a new Rectangle for the timer bar with an initial width
+         of 300 pixels and a height of 20 pixels.
+         The color is set to green initially.
+         */
         timerBar = new Rectangle(0, 0, 300, 20);  // Initial width, adjust as needed
         timerBar.setFill(Color.GREEN);  // Initial color, changes based on time left
 
@@ -172,7 +186,9 @@ public class ChallengeScene extends BaseScene implements NextPieceListener {
         game = new Game(5, 5);
         game.setNextPieceListener(this);
         // Triggers the first piece generation
-        game.generateNextPiece();
+        game.spawnPiece();  // This initializes the first piece
+        game.spawnPiece();  // This initializes the following piece
+        nextPiece(game.getFollowingPiece());  // Manually trigger the initial display update
         // Set a LineClearedListener for the game to handle faded-out blocks
         game.setLineClearedListener(clearedBlocks -> {
             if (gameBoard != null) {
@@ -203,10 +219,7 @@ public class ChallengeScene extends BaseScene implements NextPieceListener {
                 });
             }
 
-            @Override
-            public void onGameOver() {
 
-            }
         });
     }
 
@@ -253,14 +266,30 @@ public class ChallengeScene extends BaseScene implements NextPieceListener {
         gameWindow.startMenu();
     }
 
+    /**
+     * Rotates the next piece when a block is clicked.
+     *
+     * @param block the block that was clicked
+     */
     private void rotateNextPiece(GameBlock block) {
+        // Rotate the current piece
         game.rotateCurrentPiece();
     }
 
+    /**
+     * Updates the display with the next piece.
+     *
+     * @param nextPiece the next piece to be displayed
+     */
     @Override
     public void nextPiece(GamePiece nextPiece) {
-        pieceBoard.displayPiece(nextPiece);
-        followingPieceBoard.displayPiece(game.getFollowingPiece());
+        // Run the update on the JavaFX application thread
+        Platform.runLater(() -> {
+            // Display the current piece on the piece board
+            pieceBoard.displayPiece(game.getCurrentPiece());
+            // Display the following piece on the following piece board
+            followingPieceBoard.displayPiece(game.getFollowingPiece());
+            logger.info("Display updated with current and following pieces.");
+        });
     }
 }
-
