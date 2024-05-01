@@ -206,7 +206,7 @@ public class GameBlock extends Canvas {
         gc.clearRect(0, 0, width, height);
 
         /* Create a gradient fill for the empty block, transitioning from
-         transparent to white to purple, making it visually appealing
+         transparent to white to purple.
          */
         var gradient = new LinearGradient(0, 0, 1, 1, true, CycleMethod.NO_CYCLE,
                 new Stop(1, Color.TRANSPARENT),
@@ -217,8 +217,7 @@ public class GameBlock extends Canvas {
         gc.setFill(gradient);
 
         /* Draw a rounded rectangle to fill the entire canvas, using the
-         gradient fill and rounded corners to create a visually appealing
-         empty block
+         gradient fill and rounded corners
         */
         gc.fillRoundRect(0, 0, width, height, 10, 10);
 
@@ -226,8 +225,7 @@ public class GameBlock extends Canvas {
         gc.setStroke(Color.BLACK);
 
         /* Draw a border around the empty block using a rounded rectangle
-         with a black stroke color, making it visually distinct from
-         filled blocks
+         with a black stroke color
          */
         gc.strokeRoundRect(0, 0, width, height, 10, 10);
     }
@@ -318,22 +316,35 @@ public class GameBlock extends Canvas {
      * Initiates a fade-out effect on this block.
      */
     public void fadeOut() {
+        // Get the current time in nanoseconds, which will be used as a reference point for the animation
         final long startNanoTime = System.nanoTime();
-        new AnimationTimer() {
-            public void handle(long currentNanoTime) {
-                double t = (currentNanoTime - startNanoTime) / 1_000_000_000.0; // convert to seconds
-                double opacity = 1.0 - t; // Fade out over one second
 
+        // Create a new AnimationTimer to handle the fade-out animation
+        new AnimationTimer() {
+            // This method will be called repeatedly by the AnimationTimer to update the animation
+            public void handle(long currentNanoTime) {
+                // Calculate the elapsed time in seconds since the animation started
+                double t = (currentNanoTime - startNanoTime) / 1_000_000_000.0;
+                // Calculate the opacity of the block based on the elapsed time,
+                // so that it fades out over a period of one second
+                double opacity = 1.0 - t;
+
+                // If the opacity has reached 0 or less, stop the animation and set the block to empty
                 if (opacity <= 0) {
                     this.stop();
-                    setValue(0); // Ensure the block is set to empty after fade out
+                    // Ensure the block is set to empty after fade out
+                    setValue(0);
+                    // Update the visual representation of the block to reflect its empty state
                     paintEmpty();
+                    // Exit the method early, as the animation is complete
                     return;
                 }
 
+                // If the opacity is still greater than 0, update the visual representation of the block
+                // with the current opacity value, creating the fade-out effect
                 paintFade(opacity);
             }
-        }.start();
+        }.start(); // Start the animation timer
     }
 
     /**

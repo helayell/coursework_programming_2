@@ -15,7 +15,7 @@ public class PieceBoard extends GameBoard {
     /**
      * Constructs a new PieceBoard with specified dimensions.
      *
-     * @param cols  the number of columns in the PieceBoard (e.g., 3 for a Tetris piece preview)
+     * @param cols  the number of columns in the PieceBoard
      * @param rows  the number of rows in the PieceBoard
      * @param width the width of the PieceBoard in pixels
      * @param height the height of the PieceBoard in pixels
@@ -32,11 +32,6 @@ public class PieceBoard extends GameBoard {
      */
 
     public void displayPiece(GamePiece piece) {
-
-
-
-
-
         // Add indicator on the central block
         GameBlock centerBlock = getBlock(getCols() / 2, getRows() / 2);
         if (centerBlock != null) {
@@ -63,8 +58,8 @@ public class PieceBoard extends GameBoard {
             //Iterate over each column in the grid.
             for (int x = 0; x < getCols(); x++) {
                 /*
-                 * Get the block at the current position (x, y) and reset its value to 0.
-                 * This effectively clears the block, setting it to its default (empty) state.
+                  Get the block at the current position (x, y) and reset its value to 0.
+                  This clears the block, setting it to its default (empty) state.
                  */
                 getBlock(x, y).setValue(0);
             }

@@ -116,21 +116,39 @@ public class Grid {
      * @param y the row index of the piece's center
      * @return true if the piece can be placed; false otherwise
      */
-
     public boolean canPlayPiece(GamePiece piece, int x, int y) {
-        int[][] blocks = piece.getBlocks(); // 2D array representing the shape of the piece
+        // Get the 2D array representing the shape of the piece
+        int[][] blocks = piece.getBlocks();
+
+        // Iterate through each block in the piece
         for (int i = 0; i < blocks.length; i++) {
             for (int j = 0; j < blocks[i].length; j++) {
+                // If the current block is empty (0), skip it
                 if (blocks[i][j] == 0) {
                     continue; // Skip empty blocks in the piece
                 }
+
+                /*
+                 Calculate the actual x and y coordinates on the grid
+                 by offsetting the piece's center coordinates (x, y) by the block's position (i, j)
+                */
                 int gridX = x + i - 1; // Calculate the actual x coordinate on the grid
                 int gridY = y + j - 1; // Calculate the actual y coordinate on the grid
-                if (gridX < 0 || gridX >= cols || gridY < 0 || gridY >= rows || get(gridX, gridY) != 0) {
+
+                // Check if the block can be placed at the calculated grid coordinates
+                if (
+                    // Check if the block is out of bounds (less than 0 or greater than or equal to the grid size)
+                        gridX < 0 || gridX >= cols || gridY < 0 || gridY >= rows ||
+                                // Check if the cell at the grid coordinates is not empty (i.e., already occupied by another piece)
+                                get(gridX, gridY)!= 0
+                ) {
+                    // If any of the above conditions are true, the piece cannot be placed
                     return false; // Block cannot be placed if out of bounds or if cell is not empty
                 }
             }
         }
+
+        // If all blocks in the piece can be placed, return true
         return true; // All checks passed, piece can be placed
     }
 
@@ -141,17 +159,30 @@ public class Grid {
      * @param y the row index of the piece's center
      */
     public void playPiece(GamePiece piece, int x, int y) {
+        // Check if the piece can be placed at the specified coordinates
         if (!canPlayPiece(piece, x, y)) {
-            return; // Cannot play the piece here, might throw an exception or log an error as needed
+            return; // Cannot play the piece here
         }
+
+        // Get the 2D array representing the shape of the piece
         int[][] blocks = piece.getBlocks();
+
+        // Iterate through each block in the piece
         for (int i = 0; i < blocks.length; i++) {
             for (int j = 0; j < blocks[i].length; j++) {
+                // If the current block is empty (0), skip it
                 if (blocks[i][j] == 0) {
                     continue; // Skip empty blocks
                 }
+
+                /*
+                 Calculate the actual x and y coordinates on the grid
+                 by offsetting the piece's center coordinates (x, y) by the block's position (i, j)
+                 */
                 int gridX = x + i - 1; // Adjust for the center of the piece
                 int gridY = y + j - 1; // Adjust for the center of the piece
+
+                // Place the piece block on the grid at the calculated coordinates
                 set(gridX, gridY, piece.getValue()); // Place the piece block on the grid
             }
         }

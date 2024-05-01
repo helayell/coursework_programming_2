@@ -134,7 +134,6 @@ public class Game {
                         logger.info("Game Over");
                         gameOver();
                     } else {
-                        // Reset the timer within the FX thread to prevent IllegalStateException
                         nextPiece();
                         resetTimer();
                         fireGameLoopStart();
@@ -300,7 +299,7 @@ public class Game {
      */
     public void nextPiece() {
         currentPiece = followingPiece;
-        generateNextPiece(); // Ensure this method generates a new piece
+        generateNextPiece();
         logger.info("Next piece set. Current: {}, Next: {}", currentPiece, followingPiece);
 
         // Notify UI about the update

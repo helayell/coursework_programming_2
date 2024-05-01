@@ -215,9 +215,13 @@ public class GameBoard extends GridPane {
      * @param clearedBlocks the coordinates of the blocks to fade out
      */
     public void fadeOut(Set<GameBlockCoordinate> clearedBlocks) {
+        // Iterate over the set of cleared blocks using a lambda expression
         clearedBlocks.forEach(coord -> {
+            // Get the GameBlock object at the current coordinate
             GameBlock block = getBlock(coord.getX(), coord.getY());
-            if (block != null) {
+            // Check if the block is not null
+            if (block!= null) {
+                // Call the fadeOut method on the block to animate its fade-out
                 block.fadeOut();
             }
         });
